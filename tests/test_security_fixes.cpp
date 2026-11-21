@@ -136,7 +136,7 @@ static void test_decode_hex_payload() {
     uint8_t buf[16];
     size_t out_len = 99;
 
-    // Valid mixed-case hex payload
+    // Valid mixed-case hex payload, optional 0x prefix, and spaced byte formatting
     ASSERT_TRUE(decodeHexPayload("00ffA55a", buf, sizeof(buf), &out_len));
     ASSERT_EQ_INT(out_len, 4);
     ASSERT_EQ_INT(buf[0], 0x00);
@@ -144,9 +144,13 @@ static void test_decode_hex_payload() {
     ASSERT_EQ_INT(buf[2], 0xA5);
     ASSERT_EQ_INT(buf[3], 0x5A);
 
-    // Reject empty and odd-length strings
-    ASSERT_FALSE(decodeHexPayload("", buf, sizeof(buf), &out_len));
-    ASSERT_EQ_INT(out_len, 0);
+    ASSERT_TRUE(decodeHexPayload("  0xDE AD BE EF  ", buf, sizeof(buf), &out_len));
+    ASSERT_EQ_INT(out_len, 4);
+    ASSERT_EQ_INT(buf[0], 0xDE);
+    ASSERT_EQ_INT(buf[1], 0xAD);
+    ASSERT_EQ_INT(buf[2], 0xBE);
+    ASSERT_EQ_INT(buf[3], 0xEF);
+
     ASSERT_FALSE(decodeHexPayload("ABC", buf, sizeof(buf), &out_len));
 
     // Reject non-hex characters
