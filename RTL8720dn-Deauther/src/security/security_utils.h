@@ -204,4 +204,21 @@ static inline bool parseStrictIntRange(const String& src, long min_val, long max
     *out_val = tmp;
     return true;
 }
+
+// Channel band helpers (consistent between scanner counts, UI rendering, and attack runners).
+static inline bool is24GhzChannel(int ch) {
+    return ch >= 1 && ch <= 14;
+}
+
+static inline bool is5GhzChannel(int ch) {
+    return ch > 14;
+}
+
+// Clamp RSSI signal meter width percentage to valid [0, 100] CSS range.
+static inline int clampRssiPercent(int rssi) {
+    int width = rssi + 120;
+    if (width < 0) return 0;
+    if (width > 100) return 100;
+    return width;
+}
 #endif // SECURITY_UTILS_H
