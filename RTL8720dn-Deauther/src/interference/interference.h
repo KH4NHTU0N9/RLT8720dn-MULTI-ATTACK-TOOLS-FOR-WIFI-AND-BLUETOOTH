@@ -22,22 +22,19 @@ typedef struct {
     interference_state_t state;
     uint16_t beacon_interval;
     uint16_t capabilities;
+    uint32_t cycle_count;
 } BeaconClone;
 
-// === Single-target API (backward compatible) ===
 void start_interference(uint8_t* target_bssid, int channel);
-
-// === Multi-target API ===
-// Call start_interference_multi() first to initialize, then add_interference_target()
-// for each additional target (up to MAX_INTERFERENCE_TARGETS).
 void start_interference_multi();
 bool add_interference_target(uint8_t* target_bssid, int channel);
-
-// === Common API ===
 void stop_interference();
-void run_interference_cycle();
+uint32_t run_interference_cycle();
 interference_state_t get_interference_state();
 bool is_captured();
 int get_active_target_count();
 
-#endif
+// Exposed for host-side unit testing of sniffer validation
+size_t interference_sanitize_beacon_tags(const uint8_t* tags, size_t raw_len, size_t max_len);
+
+#endif // INTERFERENCE_H
