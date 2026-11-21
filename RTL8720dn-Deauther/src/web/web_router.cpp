@@ -447,3 +447,20 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (strcmp(path, "/blewrite") == 0) {
+        _handleBleWritePost(params, output);
+        return false;
+    }
+
+    if (strcmp(path, "/blespam") == 0) {
+        for (size_t i = 0; i < params.size(); i++) {
+            if (params[i].first == "type") {
+                g_app.config.ble_spam_type = webClampBleSpamType(params[i].second);
+            }
+        }
+        g_app.attack_mode = AttackMode::BLE_SPAM;
+        g_app.sent_frames = 0;
+        _writeRedirect(output, "/");
+        return true;
+    }
+
