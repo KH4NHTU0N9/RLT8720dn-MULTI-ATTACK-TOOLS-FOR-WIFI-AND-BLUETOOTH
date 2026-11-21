@@ -65,4 +65,28 @@ public:
         if (n > 0) writeBytes(tmp, (size_t)n);
     }
 
+    void writeUInt(unsigned long val) {
+        char tmp[24];
+        int n = snprintf(tmp, sizeof(tmp), "%lu", val);
+        if (n > 0) writeBytes(tmp, (size_t)n);
+    }
+
+    // Stream HTML-escaped text directly into the chunk buffer with zero heap allocations.
+    void writeHtmlEscaped(const char* raw) {
+        if (!raw || _aborted) return;
+        const char* seg_start = raw;
+        const char* p = raw;
+        while (*p) {
+            const char* esc = nullptr;
+            switch (*p) {
+                case '&':  esc = "&amp;";  break;
+                case '<':  esc = "&lt;";   break;
+                case '>':  esc = "&gt;";   break;
+                case '"':  esc = "&quot;"; break;
+                case '\'': esc = "&#39;";  break;
+                default:   break;
+            }
+            if (esc) {
+                if (p > seg_start) {
+                    writeBytes(seg_start, (size_t)(p - seg_start));
 #endif // WEB_STREAM_H
