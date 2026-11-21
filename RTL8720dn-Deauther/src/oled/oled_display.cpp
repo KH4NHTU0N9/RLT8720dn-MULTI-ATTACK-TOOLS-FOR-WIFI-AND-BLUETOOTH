@@ -395,6 +395,25 @@ void oled_show_idle(int ap24, int ap5g) {
     _text(64, 17, buf, 2);
     snprintf(buf, sizeof(buf), "2.4G:%d  5G:%d", ap24, ap5g);
     _text(4, 36, buf, 1);
+    _draw_sep(47);
+    _text(4, 50, "WebUI: 192.168.1.1", 1);
+    _display();
+}
+
+void oled_show_deauth(int num_targets, uint32_t frames) {
+    if (!_initialized || !_should_refresh()) return;
+    _clear();
+    _draw_header(" > DEAUTH ACTIVE");
+    _draw_sep(14);
+    char buf[24];
+    snprintf(buf, sizeof(buf), "Targets: %d", num_targets);
+    _text(4, 18, buf, 1);
+    _draw_sep(28);
+    _text(4, 31, "Frames:", 1);
+    _draw_big_num(4, 39, frames);
+    _draw_footer(_attack_start);
+    _display();
+}
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
