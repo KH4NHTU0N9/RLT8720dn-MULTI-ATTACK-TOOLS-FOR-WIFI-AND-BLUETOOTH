@@ -124,3 +124,21 @@ static void resetWebState() {
     ledInit();
     ledSetEnabled(true);
 }
+
+static void test_web_stream_chunking_and_abort() {
+    MemoryWebOutput out;
+    {
+        WebStream ws(out);
+        for (int i = 0; i < 300; i++) {
+            ws.writeStr("0123456789");
+        }
+        ws.writeHtmlEscaped("<a href=\"x\" title='y'>&</a>");
+        ws.flush();
+        ASSERT_FALSE(ws.aborted());
+        ASSERT_EQ_INT(ws.totalBytes(), 3000U + 61U);
+    }
+    // Every single TCP write chunk MUST stay <= WEB_STREAM_CHUNK_SIZE (1024B)
+    ASSERT_TRUE(out.max_chunk <= WEB_STREAM_CHUNK_SIZE);
+    ASSERT_TRUE(out.chunk_sizes.size() >= 3);
+    ASSERT_TRUE(out.contains("&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;"));
+
