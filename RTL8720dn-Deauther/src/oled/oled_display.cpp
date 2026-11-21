@@ -285,6 +285,22 @@ static void _circle(int cx, int cy, int r, bool fill) {
             _pixel(cx + y, cy + x, true); _pixel(cx - y, cy + x, true);
             _pixel(cx + y, cy - x, true); _pixel(cx - y, cy - x, true);
         }
+        y++;
+        if (d <= 0) { d += 2 * y + 1; }
+        else { x--; d += 2 * (y - x) + 1; }
+    }
+}
+
+// ===================================================================
+// UI HELPERS
+// ===================================================================
+static bool _should_refresh() {
+    uint32_t now = millis();
+    if ((uint32_t)(now - _last_refresh) < OLED_REFRESH_MS) return false;
+    _last_refresh = now;
+    _anim_frame++;
+    return true;
+}
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
