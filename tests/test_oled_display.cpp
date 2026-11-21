@@ -157,3 +157,19 @@ struct Ssd1306WireListener {
                 self->bit_idx++;
             } else {
                 self->bit_idx = 0;
+                self->onByte(self->cur_byte);
+                self->cur_byte = 0;
+            }
+        }
+
+        self->prev_scl = scl;
+        self->prev_sda = sda;
+    }
+};
+
+static void test_pre_init_guards_and_gpio_hardfault_fix() {
+    mockArduino().reset();
+    Ssd1306WireListener listener;
+    mockArduino().on_gpio_event = Ssd1306WireListener::gpioHook;
+    mockArduino().on_gpio_ctx = &listener;
+
