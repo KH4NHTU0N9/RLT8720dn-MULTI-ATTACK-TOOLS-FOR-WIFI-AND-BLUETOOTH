@@ -220,3 +220,22 @@ static void test_dashboard_ui_and_xss_protection() {
     CallbackRecorder rec;
     ASSERT_FALSE(webRouteRawRequest(req, std::strlen(req), out, testPostScanCb, testPrepareAttackCb, &rec));
 
+    ASSERT_TRUE(out.max_chunk <= WEB_STREAM_CHUNK_SIZE);
+    ASSERT_TRUE(out.contains("HTTP/1.1 200 OK\r\n"));
+    // 4-tab layout & separated deauth / interfere formaction endpoints
+    ASSERT_TRUE(out.contains("data-t='p_wifi'"));
+    ASSERT_TRUE(out.contains("data-t='p_spam'"));
+    ASSERT_TRUE(out.contains("data-t='p_ble'"));
+    ASSERT_TRUE(out.contains("data-t='p_cfg'"));
+    ASSERT_TRUE(out.contains("formaction='/deauth'"));
+    ASSERT_TRUE(out.contains("formaction='/interfere'"));
+    ASSERT_TRUE(out.contains("sessionStorage.getItem('tab')"));
+    // XSS escaping in AP SSID, Notice banner, and BLE Name; raw tags must NOT appear!
+    ASSERT_FALSE(out.contains("<script>alert('xss')</script>"));
+    ASSERT_TRUE(out.contains("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"));
+    ASSERT_TRUE(out.contains("Ready &lt;ok&gt; &amp; steady"));
+    ASSERT_TRUE(out.contains("AirTag&lt;img&gt;"));
+    ASSERT_TRUE(out.contains("*Hidden Network*"));
+    ASSERT_TRUE(out.contains("CH 6 &middot; 11:22:33:44:55:66"));
+    ASSERT_TRUE(out.contains("CH 149 &middot; AA:BB:CC:DD:EE:FF"));
+}
