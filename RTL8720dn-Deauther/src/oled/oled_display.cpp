@@ -454,6 +454,17 @@ void oled_show_ble_spam(int type, uint32_t packets) {
     _draw_footer(_attack_start);
     _display();
 }
+
+void oled_show_spammer(int ssid_count) {
+    if (!_initialized) return;
+    if (!_should_refresh()) return;
+    _clear();
+    _draw_header(" > SSID FLOOD");
+    _draw_sep(14);
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%d", ssid_count);
+    _text(4, 21, "SSIDs:", 1);
+    _text(46, 17, buf, 2);
     _text(4, 38, "Mode: Beacon Flood", 1);
     _draw_footer(_attack_start);
     _display();
