@@ -162,6 +162,16 @@ static void _display() {
 // ===================================================================
 static void _clear() { memset(_fb, 0, sizeof(_fb)); }
 
+static void _pixel(int x, int y, bool on) {
+    if (x < 0 || x >= OLED_SCREEN_WIDTH || y < 0 || y >= OLED_SCREEN_HEIGHT) return;
+    const size_t idx = (size_t)(y >> 3) * OLED_SCREEN_WIDTH + (size_t)x;
+    const uint8_t mask = (uint8_t)(1U << (y & 7));
+    if (on) _fb[idx] |= mask;
+    else    _fb[idx] &= (uint8_t)~mask;
+}
+
+// ===================================================================
+// 5x7 FONT (ASCII 32-126, 475 bytes)
 // ===================================================================
 static const uint8_t _font[] = {
     0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x5F,0x00,0x00, // SP !
