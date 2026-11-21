@@ -188,3 +188,21 @@ bool wifi_tx_beacon_csa_frame(void* src_mac, void* dst_mac, const char *ssid, ui
   memcpy(&frame[32], &interval, 2);
   memcpy(&frame[34], &caps, 2);
 
+  size_t offset = 36;
+  size_t ssid_len = strlen(ssid);
+  if (ssid_len > 32) ssid_len = 32;
+  if (offset + 2 + ssid_len + 10 + 3 + 5 + 6 > sizeof(frame)) return false;
+
+  // Tag 0: SSID
+  frame[offset++] = 0x00;
+  frame[offset++] = (uint8_t)ssid_len;
+  if (ssid_len > 0) {
+    memcpy(&frame[offset], ssid, ssid_len);
+    offset += ssid_len;
+  }
+
+  // Tag 1: Supported Rates
+  static const uint8_t rates[] = {0x01, 0x08, 0x8C, 0x12, 0x98, 0x24, 0xB0, 0x48, 0x60, 0x6C};
+  memcpy(&frame[offset], rates, sizeof(rates));
+  offset += sizeof(rates);
+
