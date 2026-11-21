@@ -175,4 +175,18 @@ static inline void pinMode(uint8_t pin, uint8_t mode) {
     }
 }
 
+static inline void digitalWrite(uint8_t pin, uint8_t val) {
+    MockArduinoState& st = mockArduino();
+    st.digital_write_calls++;
+    if (pin < 64) {
+        if (!st.pin_initialized[pin]) {
+            st.write_before_pinmode_violations++;
+        }
+        st.pin_level[pin] = (val != LOW) ? HIGH : LOW;
+        if (st.on_gpio_event) {
+            st.on_gpio_event(pin, st.pin_mode[pin], st.pin_level[pin], st.on_gpio_ctx);
+        }
+    }
+}
+
 #endif // MOCK_ARDUINO_H
