@@ -61,3 +61,26 @@ struct Ssd1306WireListener {
     size_t data_bytes_written = 0;
     size_t data_pages_written = 0;
 
+    void resetCounters() {
+        commands.clear();
+        data_bytes_written = 0;
+        data_pages_written = 0;
+        tx_count = 0;
+    }
+
+    static bool isPixelOn(const uint8_t ram[128 * 8], int x, int y) {
+        if (x < 0 || x >= 128 || y < 0 || y >= 64) return false;
+        size_t idx = static_cast<size_t>(y >> 3) * 128U + static_cast<size_t>(x);
+        return (ram[idx] & (1U << (y & 7))) != 0;
+    }
+
+    int countPixelsInRect(int x0, int y0, int x1, int y1) const {
+        int cnt = 0;
+        for (int y = y0; y <= y1; y++) {
+            for (int x = x0; x <= x1; x++) {
+                if (isPixelOn(gddram, x, y)) cnt++;
+            }
+        }
+        return cnt;
+    }
+
