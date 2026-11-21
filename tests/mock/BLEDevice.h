@@ -68,4 +68,23 @@ public:
     BLEConnect* configConnection() { return &conn; }
     BLEAdvert* configAdvert() { return &advert; }
 
+    bool connected(uint8_t conn_id) {
+        (void)conn_id;
+        return conn_is_connected;
+    }
+
+    void configClient() {
+        client_configured = true;
+    }
+
+    BLEClient* addClient(uint8_t conn_id) {
+        (void)conn_id;
+        if (!client_configured) {
+            add_client_without_config = true;
+            return nullptr;
+        }
+        if (return_null_client) return nullptr;
+        return &client;
+    }
+};
 #endif // MOCK_BLE_DEVICE_H
