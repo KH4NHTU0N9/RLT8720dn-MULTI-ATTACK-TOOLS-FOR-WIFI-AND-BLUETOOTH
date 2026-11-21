@@ -124,3 +124,17 @@ static size_t _findHeaderEnd(const char* buf, size_t len) {
 static bool _isPostMethod(const char* method) {
     return method && strcmp(method, "POST") == 0;
 }
+
+static bool _isGetOrHeadMethod(const char* method) {
+    return method && (strcmp(method, "GET") == 0 || strcmp(method, "HEAD") == 0);
+}
+
+static void _extractPostParams(const char* raw_req, size_t req_len,
+                               std::vector<std::pair<String, String>>& params) {
+    size_t hdr_end = _findHeaderEnd(raw_req, req_len);
+    if (hdr_end == (size_t)-1 || hdr_end + 4 >= req_len) {
+        params.clear();
+        return;
+    }
+    webParsePostBody(raw_req + hdr_end + 4, req_len - (hdr_end + 4), params);
+}
