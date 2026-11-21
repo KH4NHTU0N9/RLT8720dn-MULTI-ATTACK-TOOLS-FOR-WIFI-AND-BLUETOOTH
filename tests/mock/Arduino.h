@@ -148,4 +148,16 @@ static inline unsigned long millis() {
     return mockArduino().clock_ms;
 }
 
+static inline unsigned long micros() {
+    return static_cast<unsigned long>(mockArduino().clock_us);
+}
+
+static inline void delay(unsigned long ms) {
+    mockAdvanceMillis(ms);
+}
+
+static inline void delayMicroseconds(unsigned int us) {
+    mockArduino().clock_us += us;
+}
+
 #endif // MOCK_ARDUINO_H
