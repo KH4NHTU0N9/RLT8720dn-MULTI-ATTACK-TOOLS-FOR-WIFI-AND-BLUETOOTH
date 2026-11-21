@@ -256,3 +256,18 @@ void bleRunSpamLoop(int spam_type) {
             size = bleBuildWindowsSpamPayload(payload, sizeof(payload), r4);
         }
 
+        BLE.configAdvert()->stopAdv();
+        delay(BLE_ADV_STOP_SETTLE_MS);
+        BLE.configAdvert()->setAdvData(payload, (uint8_t)size);
+        BLE.configAdvert()->updateAdvertParams();
+        BLE.configAdvert()->startAdv();
+
+        ledSetBlue(true);
+        delay(BLE_ADV_DWELL_MS);
+        ledSetBlue(false);
+
+        g_app.sent_frames++;
+        rotation++;
+        oled_show_ble_spam(spam_type, g_app.sent_frames);
+    }
+
