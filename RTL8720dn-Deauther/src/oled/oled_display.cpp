@@ -346,6 +346,29 @@ bool oled_init() {
     _initialized = true;
     return true;
 }
+
+bool oled_is_initialized() {
+    return _initialized;
+}
+
+void oled_attack_start() {
+    _attack_start = millis();
+    _anim_frame = 0;
+}
+
+void oled_show_boot() {
+    if (!_initialized) return;
+    _clear();
+    _rect(0, 0, OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT);
+    _rect(2, 2, OLED_SCREEN_WIDTH - 4, OLED_SCREEN_HEIGHT - 4);
+    _text(40, 10, "BW16", 2);
+    _text(41, 10, "BW16", 2);
+    _text(16, 28, "DEAUTHER", 2);
+    _text(17, 28, "DEAUTHER", 2);
+    _hline(10, 46, 108);
+    _text(18, 50, "v2.1 RTL8720DN", 1);
+    _display();
+}
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
