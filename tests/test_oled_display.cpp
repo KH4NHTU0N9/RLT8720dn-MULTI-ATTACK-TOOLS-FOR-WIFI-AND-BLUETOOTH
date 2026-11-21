@@ -108,3 +108,27 @@ struct Ssd1306WireListener {
                     } else if (pending_cmd == 0x22) {
                         page_start = cmd_args[0] & 0x07U;
                         page_end = cmd_args[1] & 0x07U;
+                    }
+                    cur_col = col_start;
+                    cur_page = page_start;
+                }
+            } else if (b == 0x21 || b == 0x22) {
+                pending_cmd = b;
+                cmd_wait = 2;
+                cmd_arg_pos = 0;
+            }
+        } else if (ctrl_byte == 0x40) {
+            size_t idx = static_cast<size_t>(cur_page) * 128U + static_cast<size_t>(cur_col);
+            if (idx < sizeof(gddram)) {
+                gddram[idx] = b;
+            }
+            data_bytes_written++;
+            if (cur_col < col_end) {
+                cur_col++;
+            } else {
+                cur_col = col_start;
+                if (cur_page < page_end) cur_page++;
+                else cur_page = page_start;
+            }
+        }
+        byte_pos++;
