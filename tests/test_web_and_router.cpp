@@ -60,3 +60,17 @@ static int g_tests_failed = 0;
 
 AppState g_app;
 static uint8_t g_fake_wlan_storage[64] = {0};
+uint8_t* rltk_wlan_info = g_fake_wlan_storage;
+
+extern "C" {
+unsigned char rltk_wlan_running(unsigned char idx) { (void)idx; return 1; }
+void* alloc_mgtxmitframe(void* ptr) { (void)ptr; return nullptr; }
+void update_mgntframe_attrib(void* ptr, void* fc) { (void)ptr; (void)fc; }
+int dump_mgntframe(void* ptr, void* fc) { (void)ptr; (void)fc; return 0; }
+bool unit_test_capture_raw_frame(const void* frame, size_t length) {
+    (void)frame;
+    (void)length;
+    return true;
+}
+}
+
