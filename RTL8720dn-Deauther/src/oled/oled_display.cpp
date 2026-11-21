@@ -145,6 +145,23 @@ static void _display() {
         _i2c_write(0x22); _i2c_write((uint8_t)p); _i2c_write((uint8_t)p);
         _i2c_stop();
 
+        _i2c_begin();
+        _i2c_write(0x40);
+        for (int c = 0; c < OLED_SCREEN_WIDTH; c++) {
+            _i2c_write(_fb[offset + (size_t)c]);
+        }
+        _i2c_stop();
+
+        memcpy(&_prev_fb[offset], &_fb[offset], OLED_SCREEN_WIDTH);
+    }
+    _force_redraw = false;
+}
+
+// ===================================================================
+// FRAMEBUFFER & PIXEL OPS
+// ===================================================================
+static void _clear() { memset(_fb, 0, sizeof(_fb)); }
+
 // ===================================================================
 static const uint8_t _font[] = {
     0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x5F,0x00,0x00, // SP !
