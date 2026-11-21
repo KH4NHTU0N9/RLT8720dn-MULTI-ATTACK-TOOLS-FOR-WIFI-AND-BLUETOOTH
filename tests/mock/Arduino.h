@@ -134,4 +134,18 @@ struct MockArduinoState {
     }
 };
 
+inline MockArduinoState& mockArduino() {
+    static MockArduinoState state;
+    return state;
+}
+
+static inline void mockAdvanceMillis(unsigned long delta_ms) {
+    mockArduino().clock_ms += delta_ms;
+    mockArduino().clock_us += static_cast<unsigned long long>(delta_ms) * 1000ULL;
+}
+
+static inline unsigned long millis() {
+    return mockArduino().clock_ms;
+}
+
 #endif // MOCK_ARDUINO_H
