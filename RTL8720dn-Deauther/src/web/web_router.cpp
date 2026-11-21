@@ -413,3 +413,18 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (strcmp(path, "/led_enable") == 0) {
+        ledSetEnabled(true);
+        ledShowIdle();
+        g_app.notice.set(StatusKind::STATUS_OK, "Onboard LED enabled.");
+        _writeRedirect(output, "/");
+        return false;
+    }
+
+    if (strcmp(path, "/led_disable") == 0) {
+        ledSetEnabled(false);
+        g_app.notice.set(StatusKind::STATUS_INFO, "Onboard LED disabled.");
+        _writeRedirect(output, "/");
+        return false;
+    }
+
