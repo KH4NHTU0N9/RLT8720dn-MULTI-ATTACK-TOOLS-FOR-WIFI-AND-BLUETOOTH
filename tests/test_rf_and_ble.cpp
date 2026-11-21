@@ -247,3 +247,18 @@ static void test_interference_sniffer_deadlock_and_synthetic_fallback() {
     ASSERT_EQ_INT(mockWifi().promisc_len_used, 1);
     ASSERT_TRUE(mockWifi().promisc_cb != nullptr);
 
+    // Feed bogus non-beacon and wrong-BSSID frames -> must NOT capture
+    uint8_t wrong_fc[64] = {0};
+    wrong_fc[0] = 0xC0; // deauth, not beacon
+    std::memcpy(&wrong_fc[16], target_mac, 6);
+    mockWifiInjectPromiscFrame(wrong_fc, sizeof(wrong_fc));
+    ASSERT_EQ_INT(mockWifi().self_deadlock_detected, false);
+    ASSERT_FALSE(is_captured());
+
+    uint8_t wrong_bssid[64] = {0};
+    wrong_bssid[0] = 0x80;
+    wrong_bssid[1] = 0x00;
+    wrong_bssid[36] = 0x00; wrong_bssid[37] = 0x02; wrong_bssid[38] = 'H'; wrong_bssid[39] = 'I';
+    mockWifiInjectPromiscFrame(wrong_bssid, 40);
+    ASSERT_FALSE(is_captured());
+
