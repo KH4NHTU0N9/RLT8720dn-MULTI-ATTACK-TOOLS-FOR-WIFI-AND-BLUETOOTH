@@ -89,4 +89,28 @@ public:
             if (esc) {
                 if (p > seg_start) {
                     writeBytes(seg_start, (size_t)(p - seg_start));
+                }
+                writeStr(esc);
+                seg_start = p + 1;
+            }
+            p++;
+        }
+        if (p > seg_start) {
+            writeBytes(seg_start, (size_t)(p - seg_start));
+        }
+    }
+
+    bool flush() {
+        if (_aborted || _len == 0) return !_aborted;
+        size_t sent = _output.writeBytes(_buf, _len);
+        if (sent == 0) {
+            _aborted = true;
+            _len = 0;
+            return false;
+        }
+        _total_bytes += sent;
+        _len = 0;
+        return true;
+    }
+
 #endif // WEB_STREAM_H
