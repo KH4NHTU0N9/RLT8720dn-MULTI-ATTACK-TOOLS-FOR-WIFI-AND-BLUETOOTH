@@ -173,3 +173,17 @@ static void test_pre_init_guards_and_gpio_hardfault_fix() {
     mockArduino().on_gpio_event = Ssd1306WireListener::gpioHook;
     mockArduino().on_gpio_ctx = &listener;
 
+    // Calling render functions before oled_init() must safely no-op without touching GPIO
+    ASSERT_FALSE(oled_is_initialized());
+    oled_show_boot();
+    oled_show_scanning();
+    oled_show_idle(1, 1);
+    oled_show_spammer(5);
+    ASSERT_EQ_INT(mockArduino().digital_write_calls, 0);
+
+    // Initialize OLED and verify pinMode ALWAYS precedes digitalWrite (prevents AmebaD HardFault)
+    ASSERT_TRUE(oled_init());
+    ASSERT_TRUE(oled_is_initialized());
+    ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
+    ASSERT_EQ_INT(listener.wrong_addr_count, 0);
+
