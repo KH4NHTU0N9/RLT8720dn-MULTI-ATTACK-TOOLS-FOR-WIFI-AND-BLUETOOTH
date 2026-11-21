@@ -239,3 +239,18 @@ static void test_dashboard_ui_and_xss_protection() {
     ASSERT_TRUE(out.contains("CH 6 &middot; 11:22:33:44:55:66"));
     ASSERT_TRUE(out.contains("CH 149 &middot; AA:BB:CC:DD:EE:FF"));
 }
+
+static void test_http_router_endpoints() {
+    resetWebState();
+    CallbackRecorder rec;
+
+    // Seed 2 scanned APs
+    for (int i = 0; i < 2; i++) {
+        WiFiScanResult ap{};
+        ap.ssid = (i == 0) ? "Net24" : "Net5G";
+        std::memset(ap.bssid, static_cast<uint8_t>(0x10 + i), 6);
+        ap.channel = (i == 0) ? 1 : 36;
+        ap.rssi = -55;
+        g_scan_results.push_back(ap);
+    }
+
