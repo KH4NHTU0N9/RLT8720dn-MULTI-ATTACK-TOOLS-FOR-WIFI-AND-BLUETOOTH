@@ -138,6 +138,23 @@ static void _activate_synthetic(BeaconClone* t) {
 }
 
 // ===================================================================
+// SNIFFER CALLBACK (WLAN RX thread context)
+// Must NEVER call wifi_set_promisc() (would self-deadlock promisc_sema),
+// malloc/free, Serial, or Arduino GPIO APIs.
+// ===================================================================
+static void _beacon_sniffer_cb(unsigned char* frame, unsigned int len, void* arg) {
+    (void)arg;
+    if (!sniffer_active || rx_captured_ready || !frame || len < 38) return;
+
+    // Require 802.11 Beacon Frame Control: Type=Mgmt(0), Subtype=Beacon(8) => 0x80,
+    // ToDS=0 & FromDS=0 in byte 1.
+    if (frame[0] != 0x80 || (frame[1] & 0x03) != 0x00) return;
+
+    const int idx = rx_target_idx;
+    if (idx < 0 || idx >= num_targets || idx >= MAX_INTERFERENCE_TARGETS) return;
+    BeaconClone* t = &targets[idx];
+    if (t->state != INT_STATE_CAPTURING) return;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
