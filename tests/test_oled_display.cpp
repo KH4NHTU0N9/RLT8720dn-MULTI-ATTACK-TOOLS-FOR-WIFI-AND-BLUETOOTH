@@ -249,3 +249,19 @@ static void test_refresh_throttling_and_attack_layouts() {
     oled_show_deauth(3, 1300);
     ASSERT_EQ_INT(listener.data_pages_written, 0);
 
+    // Verify BLE SwiftPair (widest string "Win SwiftPair" starting at x=40) fits completely inside x<128
+    mockAdvanceMillis(OLED_REFRESH_MS);
+    listener.resetCounters();
+    oled_show_ble_spam(2, 999);
+    ASSERT_TRUE(listener.data_pages_written > 0);
+    ASSERT_TRUE(listener.countPixelsInRect(40, 18, 127, 25) > 0);
+
+    // Verify SSID Spammer layout separator gap (no overlap between header y=0..11 and sep y=14)
+    mockAdvanceMillis(OLED_REFRESH_MS);
+    listener.resetCounters();
+    oled_show_spammer(16);
+    ASSERT_TRUE(listener.data_pages_written > 0);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 12, 127, 13), 0);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 14, 127, 14), 128);
+    ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
+}
