@@ -105,3 +105,22 @@ static bool testPostScanCb(void* ctx) {
     rec->scan_calls++;
     return true;
 }
+
+static void testPrepareAttackCb(void* ctx) {
+    CallbackRecorder* rec = static_cast<CallbackRecorder*>(ctx);
+    rec->prepare_attack_calls++;
+}
+
+static void resetWebState() {
+    mockArduino().reset();
+    mockWifi().reset();
+    g_app = AppState{};
+    g_scan_results.clear();
+    g_ble_results.clear();
+    g_deauth_channels.clear();
+    stop_interference();
+    Spammer.stop();
+    Spammer.clearSSIDs();
+    ledInit();
+    ledSetEnabled(true);
+}
