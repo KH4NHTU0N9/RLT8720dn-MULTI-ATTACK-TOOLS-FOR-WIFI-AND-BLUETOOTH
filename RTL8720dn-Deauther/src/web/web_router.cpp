@@ -576,3 +576,9 @@ void webServeClient(WiFiServer& server) {
         }
     }
 
+    if (!skip_stop) {
+        client.stop();
+    }
+    ledSetGreen(false);
+}
+#endif
