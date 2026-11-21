@@ -162,3 +162,27 @@ static void _handleWifiAttackPost(const std::vector<std::pair<String, String>>& 
         }
     }
 
+    if (targets.empty()) {
+        g_app.notice.set(StatusKind::STATUS_WARN, "Select at least 1 Wi-Fi target before starting.");
+        _writeRedirect(output, "/");
+        return;
+    }
+
+    if (is_interference) {
+        g_app.attack_mode = AttackMode::INTERFERENCE;
+        g_app.sent_frames = 0;
+        _writeRedirect(output, "/");
+        if (prepare_attack_cb) prepare_attack_cb(cb_ctx);
+
+        if (targets.size() == 1) {
+            int idx = targets[0];
+            start_interference(g_scan_results[(size_t)idx].bssid, g_scan_results[(size_t)idx].channel);
+        } else {
+            start_interference_multi();
+            for (size_t i = 0; i < targets.size() && i < MAX_INTERFERENCE_TARGETS; i++) {
+                int idx = targets[i];
+                add_interference_target(g_scan_results[(size_t)idx].bssid, g_scan_results[(size_t)idx].channel);
+            }
+        }
+        return;
+    }
