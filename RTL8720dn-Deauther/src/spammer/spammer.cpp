@@ -107,4 +107,25 @@ String SSIDSpammer::_generateRandomSSID(int length) {
     if (length < 1) length = 1;
     if (length > MAX_SSID_LEN) length = MAX_SSID_LEN;
 
+    String res;
+    res.reserve((unsigned int)length);
+    const long charset_len = (long)(sizeof(kChars) - 1);
+    for (int i = 0; i < length; i++) {
+        res += kChars[random(charset_len)];
+    }
+    return res;
+}
+
+bool SSIDSpammer::_craftAndSend(const String& ssid, const uint8_t* bssid, int channel) {
+    if (bssid == nullptr) return false;
+    if (channel < 1 || channel > 14) channel = 1;
+
+    uint8_t frame[MAX_BEACON_SIZE];
+    memset(frame, 0, 24);
+    frame[0] = 0x80;
+    memcpy(&frame[4], "\xFF\xFF\xFF\xFF\xFF\xFF", 6);
+    memcpy(&frame[10], bssid, 6);
+    memcpy(&frame[16], bssid, 6);
+    size_t offset = 24;
+
 }
