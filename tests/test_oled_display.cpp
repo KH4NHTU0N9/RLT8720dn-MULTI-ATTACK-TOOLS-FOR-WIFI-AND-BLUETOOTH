@@ -218,3 +218,19 @@ static void test_dirty_page_diffing_and_screens() {
     ASSERT_EQ_INT(listener.data_pages_written, 0);
     ASSERT_EQ_INT(listener.data_bytes_written, 0);
 
+    // Changing only counts must redraw fewer than all 8 pages (header page 0 & bottom page 7 unchanged)
+    listener.resetCounters();
+    oled_show_idle(5, 2);
+    ASSERT_TRUE(listener.data_pages_written >= 1);
+    ASSERT_TRUE(listener.data_pages_written < 8);
+}
+
+static void test_refresh_throttling_and_attack_layouts() {
+    mockArduino().reset();
+    Ssd1306WireListener listener;
+    mockArduino().on_gpio_event = Ssd1306WireListener::gpioHook;
+    mockArduino().on_gpio_ctx = &listener;
+
+    ASSERT_TRUE(oled_init());
+    oled_attack_start();
+
