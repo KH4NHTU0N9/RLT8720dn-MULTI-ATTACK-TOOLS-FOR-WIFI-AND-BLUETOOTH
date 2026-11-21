@@ -384,3 +384,21 @@ static void test_ble_manager_payloads_scan_and_gatt_write() {
         mockBleInstance().scan.canned_devices.push_back(info);
     }
 
+    const unsigned long t0 = millis();
+    size_t found = bleScanDevices();
+    const unsigned long elapsed = millis() - t0;
+    ASSERT_EQ_INT(found, MAX_BLE_RESULTS);
+    ASSERT_TRUE(elapsed <= BLE_SCAN_DURATION_MS + 100);
+    ASSERT_STREQ(String(g_ble_results[0].address), "AA:00:00:00:00:00");
+    ASSERT_STREQ(g_ble_results[0].name, "Dev0");
+    ASSERT_EQ_INT(g_ble_results[1].addr_type, 1);
+
+    // BLE GATT write: async connect polling + configClient before addClient + Random address type
+    BLERemoteCharacteristic rchar;
+    rchar.uuid = "FFE1";
+    BLERemoteService rsvc;
+    rsvc.uuid = "FFE0";
+    rsvc.characteristic = &rchar;
+    mockBleInstance().client.service = &rsvc;
+    mockBleInstance().conn.conn_id_after_polls = 2;
+
