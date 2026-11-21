@@ -240,6 +240,20 @@ static void test_ssid_mac_and_http_helpers() {
     ASSERT_TRUE(hdr200.indexOf("X-Frame-Options: DENY\r\n") >= 0);
     ASSERT_TRUE(hdr200.indexOf("\r\n\r\n") >= 0);
 
+    String hdr405 = buildHttpResponseHeaders(405, "text/plain");
+    ASSERT_TRUE(hdr405.indexOf("HTTP/1.1 405 Method Not Allowed\r\n") == 0);
+
+    String hdr413 = buildHttpResponseHeaders(413, "text/plain");
+    ASSERT_TRUE(hdr413.indexOf("HTTP/1.1 413 Payload Too Large\r\n") == 0);
+
+    // HTTP 303 See Other redirect terminates header block with CRLFCRLF
+    String redir = buildHttpRedirectHeaders("/");
+    ASSERT_STREQ(redir,
+                 "HTTP/1.1 303 See Other\r\n"
+                 "Location: /\r\n"
+                 "Content-Length: 0\r\n"
+                 "Connection: close\r\n\r\n");
+}
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
