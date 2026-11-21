@@ -186,3 +186,22 @@ static void _handleWifiAttackPost(const std::vector<std::pair<String, String>>& 
         }
         return;
     }
+
+    for (size_t i = 0; i < targets.size(); i++) {
+        int idx = targets[i];
+        int ch = g_scan_results[(size_t)idx].channel;
+        g_deauth_channels[ch].push_back(idx);
+    }
+
+    g_app.attack_mode = AttackMode::DEAUTH;
+    g_app.sent_frames = 0;
+    _writeRedirect(output, "/");
+    if (prepare_attack_cb) prepare_attack_cb(cb_ctx);
+}
+
+static void _handleSpamPost(const std::vector<std::pair<String, String>>& params,
+                            IWebOutput& output,
+                            void (*prepare_attack_cb)(void*), void* cb_ctx) {
+    std::vector<String> ssids;
+    int random_count = 0;
+
