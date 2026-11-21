@@ -539,3 +539,20 @@ void webServeClient(WiFiServer& server) {
             }
         }
 
+        if (header_end != (size_t)-1 && content_length >= 0) {
+            const size_t expected_total = header_end + 4U + (size_t)content_length;
+            if (expected_total > MAX_HTTP_REQ_SIZE) {
+                req_oversized = true;
+                break;
+            }
+            if (req_len >= expected_total && !client.available()) {
+                break;
+            }
+        }
+
+        if (!client.available()) {
+            delay(1);
+        }
+    }
+    req_buf[req_len] = '\0';
+
