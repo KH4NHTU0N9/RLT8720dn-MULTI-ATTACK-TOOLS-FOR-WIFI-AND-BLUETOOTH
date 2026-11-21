@@ -47,3 +47,18 @@ void setup() {
   }
 #endif
 
+  server.begin();
+
+  int c24 = 0, c5g = 0;
+  wifiScanCountByBand(&c24, &c5g);
+  oled_show_idle(c24, c5g);
+  ledShowIdle();
+}
+
+void loop() {
+  if (g_app.attack_mode != AttackMode::IDLE) {
+    attackRunTick(server);
+  }
+
+  webServeClient(server);
+
