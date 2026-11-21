@@ -167,4 +167,24 @@ static inline String sanitizeSsid(const uint8_t* raw_ssid, size_t raw_len) {
     ssid_buf[out_pos] = '\0';
     return String(ssid_buf);
 }
+
+// Format a 6-byte MAC address as uppercase colon-separated hex.
+static inline void formatMacAddress(const uint8_t mac[6], char* out, size_t out_size) {
+    if (!out || out_size < 18) return;
+    if (!mac) {
+        snprintf(out, out_size, "00:00:00:00:00:00");
+        return;
+    }
+    snprintf(out, out_size, "%02X:%02X:%02X:%02X:%02X:%02X",
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+// Strict integer parser (avoids String::toInt() silently returning 0 on "" or "abc").
+static inline bool parseStrictInt(const String& src, long* out_val) {
+    if (!out_val) return false;
+    const char* s = src.c_str();
+    if (!s) return false;
+    while (*s && isspace((unsigned char)*s)) s++;
+    if (*s == '\0') return false;
+
 #endif // SECURITY_UTILS_H
