@@ -33,3 +33,21 @@ static rtw_result_t _scanResultHandler(rtw_scan_handler_result_t* scan_result) {
     g_scan_results.push_back(result);
     return RTW_SUCCESS;
 }
+
+void wifiScannerInit() {
+    g_scan_results.reserve(MAX_SCAN_RESULTS);
+}
+
+int wifiScanNetworks() {
+    DEBUG_SER_PRINT("Scanning WiFi networks...");
+    g_scan_accepting = false;
+    g_scan_done = false;
+    g_scan_results.clear();
+    g_scan_accepting = true;
+
+    if (wifi_scan_networks(_scanResultHandler, NULL) != RTW_SUCCESS) {
+        g_scan_accepting = false;
+        DEBUG_SER_PRINT(" failed!\n");
+        return 1;
+    }
+
