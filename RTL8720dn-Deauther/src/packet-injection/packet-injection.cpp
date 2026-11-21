@@ -42,3 +42,19 @@ bool wifi_tx_raw_frame(void* frame, size_t length) {
   uint8_t *frame_control = (uint8_t *)alloc_mgtxmitframe(ptr + 0xa80);
   if (frame_control == nullptr) {
     return false;
+  }
+
+  update_mgntframe_attrib(ptr, frame_control + 8);
+  uint8_t *tx_buf = (uint8_t *)*(uint32_t *)(frame_control + 0x80);
+  if (tx_buf == nullptr) {
+    return false;
+  }
+  memset((void *)tx_buf, 0, 0x68);
+  uint8_t *frame_data = tx_buf + 0x28;
+  memcpy(frame_data, frame, length);
+  *(uint32_t *)(frame_control + 0x14) = (uint32_t)length;
+  *(uint32_t *)(frame_control + 0x18) = (uint32_t)length;
+  dump_mgntframe(ptr, frame_control);
+  return true;
+#endif
+}
