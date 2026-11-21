@@ -245,4 +245,18 @@ static inline String buildHttpResponseHeaders(int code, const String& content_ty
     response += content_type;
     response += "\r\nCache-Control: no-store\r\n";
     response += "X-Content-Type-Options: nosniff\r\n";
+    response += "X-Frame-Options: DENY\r\n";
+    response += "Connection: close\r\n\r\n";
+    return response;
+}
+
+// Build RFC 9110/9112 compliant HTTP 303 See Other redirect (terminates POST->GET cleanly).
+static inline String buildHttpRedirectHeaders(const String& url) {
+    String response;
+    response.reserve(96 + url.length());
+    response += "HTTP/1.1 303 See Other\r\nLocation: ";
+    response += url;
+    response += "\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    return response;
+}
 #endif // SECURITY_UTILS_H
