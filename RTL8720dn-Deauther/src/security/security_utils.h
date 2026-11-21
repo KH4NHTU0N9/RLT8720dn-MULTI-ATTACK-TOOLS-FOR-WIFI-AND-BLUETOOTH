@@ -340,4 +340,24 @@ static inline int extractHttpContentLength(const char* req, size_t header_end, l
                 while (v_end > v_start && (req[v_end - 1] == ' ' || req[v_end - 1] == '\t')) {
                     v_end--;
                 }
+                if (v_end == v_start) return -1;
+                long val = 0;
+                for (size_t i = v_start; i < v_end; i++) {
+                    char c = req[i];
+                    if (c < '0' || c > '9') return -1;
+                    if (val > (LONG_MAX - (c - '0')) / 10) return -1;
+                    val = val * 10 + (c - '0');
+                }
+                *out_len = val;
+                return 1;
+            }
+        }
+
+        pos = line_end;
+        if (pos < header_end && req[pos] == '\r') pos++;
+        if (pos < header_end && req[pos] == '\n') pos++;
+    }
+    return 0;
+}
+
 #endif // SECURITY_UTILS_H
