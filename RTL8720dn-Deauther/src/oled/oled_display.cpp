@@ -259,6 +259,32 @@ static void _hline(int x, int y, int w) {
     for (int i = 0; i < w; i++) _pixel(x + i, y, true);
 }
 
+static void _fill_rect(int x, int y, int w, int h, bool on) {
+    for (int j = 0; j < h; j++)
+        for (int i = 0; i < w; i++)
+            _pixel(x + i, y + j, on);
+}
+
+static void _rect(int x, int y, int w, int h) {
+    _hline(x, y, w);
+    _hline(x, y + h - 1, w);
+    for (int j = 0; j < h; j++) { _pixel(x, y + j, true); _pixel(x + w - 1, y + j, true); }
+}
+
+static void _circle(int cx, int cy, int r, bool fill) {
+    int x = r, y = 0, d = 1 - r;
+    while (x >= y) {
+        if (fill) {
+            _hline(cx - x, cy + y, 2 * x + 1);
+            _hline(cx - x, cy - y, 2 * x + 1);
+            _hline(cx - y, cy + x, 2 * y + 1);
+            _hline(cx - y, cy - x, 2 * y + 1);
+        } else {
+            _pixel(cx + x, cy + y, true); _pixel(cx - x, cy + y, true);
+            _pixel(cx + x, cy - y, true); _pixel(cx - x, cy - y, true);
+            _pixel(cx + y, cy + x, true); _pixel(cx - y, cy + x, true);
+            _pixel(cx + y, cy - x, true); _pixel(cx - y, cy - x, true);
+        }
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
