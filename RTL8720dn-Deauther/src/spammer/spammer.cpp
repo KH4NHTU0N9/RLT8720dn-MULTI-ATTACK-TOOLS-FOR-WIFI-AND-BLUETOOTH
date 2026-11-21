@@ -78,4 +78,18 @@ void SSIDSpammer::_hopChannelIfDue() {
 uint32_t SSIDSpammer::run() {
     if (!_active || _networks.empty()) return 0;
 
+    uint32_t sent = 0;
+    for (size_t i = 0; i < _networks.size(); i++) {
+        _hopChannelIfDue();
+        if (_craftAndSend(_networks[i].ssid, _networks[i].bssid, _currentChannel)) {
+            sent++;
+        }
+        // Yield every 8 frames to balance throughput and FreeRTOS WDT feeding
+        if ((i & 7U) == 7U) {
+            delay(1);
+        }
+    }
+    delay(1);
+    return sent;
+}
 }
