@@ -133,52 +133,19 @@ static inline String parseBleDeviceName(const uint8_t* p_adv, size_t len) {
             if (name_len > sizeof(name_buf) - 1) {
                 name_len = sizeof(name_buf) - 1;
             }
-            memcpy(name_buf, &p_adv[offset + 2], name_len);
-            name_buf[name_len] = '\0';
-            return String(name_buf);
+            size_t out_pos = 0;
+            for (size_t j = 0; j < name_len; j++) {
+                uint8_t ch = p_adv[offset + 2 + j];
+                if (ch >= 0x20 && ch != 0x7F) {
+                    name_buf[out_pos++] = (char)ch;
+                }
+            }
+            name_buf[out_pos] = '\0';
+            if (out_pos > 0) {
+                return String(name_buf);
+            }
         }
         offset += (size_t)ad_len + 1;
     }
     return String("[Unknown]");
-}
-
-// Safely copy a raw 802.11 SSID buffer without mutating the source SDK struct.
-static inline String sanitizeSsid(const uint8_t* raw_ssid, size_t raw_len) {
-    if (!raw_ssid || raw_len == 0) return String("");
-    char ssid_buf[MAX_SSID_BYTES + 1];
-    size_t copy_len = raw_len;
-    if (copy_len > MAX_SSID_BYTES) copy_len = MAX_SSID_BYTES;
-    memcpy(ssid_buf, raw_ssid, copy_len);
-    ssid_buf[copy_len] = '\0';
-    return String(ssid_buf);
-}
-
-// Clamp RSSI signal meter width percentage to valid [0, 100] CSS range.
-static inline int clampRssiPercent(int rssi) {
-    int width = rssi + 120;
-    if (width < 0) return 0;
-    if (width > 100) return 100;
-    return width;
-}
-
-// Build RFC 9112 compliant HTTP response headers with CRLF line endings.
-static inline String buildHttpResponseHeaders(int code, const String& content_type) {
-    const char* reason = (code == 404) ? "Not Found" : (code == 400) ? "Bad Request" : "OK";
-    String response = "HTTP/1.1 " + String(code) + " " + String(reason) + "\r\n";
-    response += "Content-Type: " + content_type + "\r\n";
-    response += "X-Content-Type-Options: nosniff\r\n";
-    response += "X-Frame-Options: DENY\r\n";
-    response += "Connection: close\r\n\r\n";
-    return response;
-}
-
-// Build RFC 9110/9112 compliant HTTP 303 See Other redirect (terminates POST->GET cleanly).
-static inline String buildHttpRedirectHeaders(const String& url) {
-    String response = "HTTP/1.1 303 See Other\r\n";
-    response += "Location: " + url + "\r\n";
-    response += "Content-Length: 0\r\n";
-    response += "Connection: close\r\n\r\n";
-    return response;
-}
-
 #endif // SECURITY_UTILS_H
