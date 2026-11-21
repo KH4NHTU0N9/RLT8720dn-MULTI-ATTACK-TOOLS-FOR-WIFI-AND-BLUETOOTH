@@ -391,6 +391,22 @@ static uint32_t _scatter_adjacent(BeaconClone* t) {
     }
     adj_hop_idx++;
 
+    uint32_t sent = 0;
+    if (wext_set_channel(WLAN0_NAME, adj_ch) >= 0) {
+        delay(CHANNEL_SWITCH_DELAY_MS);
+        static uint8_t bcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        for (int i = 0; i < 8; i++) {
+            if (t->payload && t->payload_len > 0) {
+                if (wifi_tx_raw_beacon(t->bssid, bcast, t->payload, t->payload_len,
+                                       t->beacon_interval, t->capabilities)) {
+                    sent++;
+                }
+            }
+        }
+        delay(1);
+    }
+    return sent;
+}
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
