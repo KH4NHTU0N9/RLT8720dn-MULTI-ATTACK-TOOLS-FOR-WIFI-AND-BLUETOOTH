@@ -47,3 +47,12 @@ The codebase was refactored into a modular `src/` architecture and verified with
 
 ## 4. Verification Matrix
 
+1. **Firmware Build (`arduino-cli`, Realtek AmebaD 3.1.9):**
+   * Command: `arduino-cli compile --clean --fqbn realtek:AmebaD:Ai-Thinker_BW16 --warnings all RTL8720dn-Deauther`
+   * Result: **Exit code `0`** (`938748 bytes`, `44%` flash), **0 warnings** in project sources.
+2. **Host C++17 Unit Tests (`-Wall -Wextra -Werror -fsanitize=address,undefined`):**
+   * `tests/test_security_fixes.cpp`: **PASSED: 102 assertions**
+   * `tests/test_oled_display.cpp`: **PASSED: 32 assertions** (includes bit-bang I2C bus protocol listener & GPIO HardFault detector)
+   * `tests/test_rf_and_ble.cpp`: **PASSED: 129 assertions** (802.11 frame sizes, NAV/CSA/ECSA, Spammer, Interference deadlock guard & TLV sanitizer, LED, Wi-Fi scanner, BLE payloads & GATT client flow)
+   * `tests/test_web_and_router.cpp`: **PASSED: 92 assertions** (chunked `WebStream`, POST body decoding, UI XSS escaping, HTTP routing `200/204/303/400/404/405`)
+   * **Total:** **355 assertions passed**, 0 ASan/UBSan violations, 0 compiler warnings.
