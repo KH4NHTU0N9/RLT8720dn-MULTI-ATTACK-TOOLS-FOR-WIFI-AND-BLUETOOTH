@@ -41,4 +41,11 @@ BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
                                       const uint8_t* payload, size_t payload_len);
 
 // Build advertising payloads cleanly (exposed for host-side verification).
+size_t bleBuildAppleSpamPayload(uint8_t* out_buf, size_t cap, int rotation, uint8_t r0, uint8_t r1);
+size_t bleBuildGoogleSpamPayload(uint8_t* out_buf, size_t cap, int rotation);
+size_t bleBuildWindowsSpamPayload(uint8_t* out_buf, size_t cap, const uint8_t rand4[4]);
+
+// Run blocking BLE advertisement flood loop.
+void bleRunSpamLoop(int spam_type);
+
 #endif // BLE_MANAGER_H
