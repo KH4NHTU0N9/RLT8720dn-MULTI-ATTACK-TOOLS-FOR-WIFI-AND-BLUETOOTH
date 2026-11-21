@@ -114,6 +114,12 @@ static void test_ble_device_name_parser() {
         delete[] heap_adv;
     }
 
+    // Control characters inside BLE local name must be stripped
+    {
+        const uint8_t raw[] = {0x06, 0x09, 'A', 0x01, 0x7F, '\n', 'B'};
+        ASSERT_STREQ(parseBleDeviceName(raw, sizeof(raw)), "AB");
+    }
+
     // Long name (39 bytes) must be truncated cleanly to 31 bytes without stack overflow
     {
         uint8_t adv[41];
