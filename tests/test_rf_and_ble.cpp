@@ -303,3 +303,21 @@ static void test_interference_sniffer_deadlock_and_synthetic_fallback() {
     ASSERT_EQ_INT(get_active_target_count(), 4);
     stop_interference();
 }
+
+static void test_led_and_wifi_scanner() {
+    resetHarness();
+
+    // Global LED disable must silence all subsequent LED transitions
+    ledSetEnabled(false);
+    const uint32_t writes_before = mockArduino().digital_write_calls;
+    ledShowHttpBusy();
+    ledSetBlue(true);
+    ledToggleGreen();
+    ASSERT_EQ_INT(mockArduino().digital_write_calls, writes_before);
+    ledSetEnabled(true);
+    ledShowIdle();
+    ASSERT_EQ_INT(mockArduino().pin_level[LED_R], HIGH);
+    ASSERT_EQ_INT(mockArduino().pin_level[LED_G], LOW);
+    ASSERT_EQ_INT(mockArduino().pin_level[LED_B], LOW);
+    ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
+
