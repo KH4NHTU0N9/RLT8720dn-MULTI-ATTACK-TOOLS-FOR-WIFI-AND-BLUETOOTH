@@ -71,3 +71,17 @@ static void _bleScanCallback(T_LE_CB_DATA* p_data) {
     res.name = parseBleDeviceName(info->data, info->data_len);
     g_ble_results.push_back(res);
 }
+
+void bleManagerInit() {
+    g_ble_results.reserve(MAX_BLE_RESULTS);
+}
+
+size_t bleScanDevices() {
+    g_ble_results.clear();
+    g_ble_scan_accepting = true;
+
+    BLE.end();
+    BLE.init();
+    BLE.beginCentral(1);
+    BLE.setScanCallback(_bleScanCallback);
+
