@@ -18,3 +18,18 @@
 
 // Initialize GPIO & SSD1306 controller. Returns true once driver is ready.
 bool oled_init();
+bool oled_is_initialized();
+
+// Reset attack uptime counter when an attack starts.
+void oled_attack_start();
+
+// Screen rendering functions
+void oled_show_boot();
+void oled_show_scanning();
+void oled_show_idle(int ap_count_24, int ap_count_5g);
+void oled_show_deauth(int num_targets, uint32_t frames);
+void oled_show_interference(int active_targets, int max_targets);
+void oled_show_ble_spam(int type, uint32_t packets);
+void oled_show_spammer(int ssid_count);
+
+#endif // OLED_DISPLAY_H
