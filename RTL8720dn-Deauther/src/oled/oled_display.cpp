@@ -126,47 +126,25 @@ static void _ssd1306_init_hw() {
         0xAF,        // Display ON
     };
     _i2c_begin();
-    _i2c_write(0x00); // All following bytes are commands
-    for (unsigned int i = 0; i < sizeof(init); i++) {
+    _i2c_write(0x00);
+    for (size_t i = 0; i < sizeof(init); i++) {
         _i2c_write(init[i]);
     }
     _i2c_stop();
 }
 
 static void _display() {
-    // Set column range 0–127
-    _i2c_begin(); _i2c_write(0x00);
-    _i2c_write(0x21); _i2c_write(0); _i2c_write(127);
-    _i2c_stop();
-    // Set page range 0–7
-    _i2c_begin(); _i2c_write(0x00);
-    _i2c_write(0x22); _i2c_write(0); _i2c_write(7);
-    _i2c_stop();
-    // Send framebuffer (page by page for reliability)
-    for (int p = 0; p < 8; p++) {
-        _i2c_begin();
-        _i2c_write(0x40);  // Data mode
-        for (int c = 0; c < 128; c++) {
-            _i2c_write(_fb[p * 128 + c]);
+    for (int p = 0; p < OLED_PAGE_COUNT; p++) {
+        const size_t offset = (size_t)p * OLED_SCREEN_WIDTH;
+        if (!_force_redraw && memcmp(&_fb[offset], &_prev_fb[offset], OLED_SCREEN_WIDTH) == 0) {
+            continue;
         }
+        // Address the dirty page directly in horizontal addressing mode
+        _i2c_begin(); _i2c_write(0x00);
+        _i2c_write(0x21); _i2c_write(0); _i2c_write((uint8_t)(OLED_SCREEN_WIDTH - 1));
+        _i2c_write(0x22); _i2c_write((uint8_t)p); _i2c_write((uint8_t)p);
         _i2c_stop();
-    }
-}
 
-// ===================================================================
-// FRAMEBUFFER & PIXEL OPS
-// ===================================================================
-static void _clear() { memset(_fb, 0, 1024); }
-
-static void _pixel(int x, int y, bool on) {
-    if (x < 0 || x >= 128 || y < 0 || y >= 64) return;
-    if (on) _fb[(y >> 3) * 128 + x] |=  (1 << (y & 7));
-    else    _fb[(y >> 3) * 128 + x] &= ~(1 << (y & 7));
-}
-
-// ===================================================================
-// 5x7 FONT (ASCII 32–126, 475 bytes)
-// Each char = 5 column bytes, LSB = top row
 // ===================================================================
 static const uint8_t _font[] = {
     0x00,0x00,0x00,0x00,0x00, 0x00,0x00,0x5F,0x00,0x00, // SP !
