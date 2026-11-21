@@ -184,7 +184,7 @@ static void test_decode_hex_payload() {
     ASSERT_FALSE(decodeHexPayload("AA", buf, 0, &out_len));
 }
 
-static void test_ssid_and_http_helpers() {
+static void test_ssid_mac_and_http_helpers() {
     // Null / empty SSID
     ASSERT_STREQ(sanitizeSsid(nullptr, 10), "");
     uint8_t dummy = 'X';
