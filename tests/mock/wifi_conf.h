@@ -48,4 +48,16 @@ inline MockWifiState& mockWifi() {
     return st;
 }
 
+static inline int wext_set_channel(const char* ifname, int ch) {
+    (void)ifname;
+    mockWifi().last_channel = ch;
+    mockWifi().channel_history.push_back(ch);
+    return 0;
+}
+
+extern "C" {
+static inline void wifi_enter_promisc_mode() {
+    mockWifi().enter_promisc_calls++;
+}
+
 #endif // MOCK_WIFI_CONF_H
