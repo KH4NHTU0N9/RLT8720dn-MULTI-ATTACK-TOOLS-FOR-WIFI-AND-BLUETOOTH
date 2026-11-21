@@ -118,3 +118,27 @@ static void _renderReasonOptions(WebStream& out, uint16_t active_reason) {
         out.writeStr("</option>");
     }
 }
+
+void webRenderScanRow(WebStream& out, const WiFiScanResult& ap, size_t idx, const char* group_cls) {
+    const int color_score = ap.rssi + 130;
+    const char* color_cls = (color_score < 50) ? "r" : (color_score < 70) ? "o" : "g";
+    const int width = clampRssiPercent(ap.rssi);
+
+    char bssid_str[18];
+    formatMacAddress(ap.bssid, bssid_str, sizeof(bssid_str));
+
+    out.writeStr("<tr><td><div class='ssid'>");
+    if (ap.ssid.length() > 0) {
+        out.writeHtmlEscaped(ap.ssid.c_str());
+    } else {
+        out.writeStr("<span class='hid'>*Hidden Network*</span>");
+    }
+    out.writeStr("</div><div class='meta'>CH ");
+    out.writeUInt((unsigned long)ap.channel);
+    out.writeStr(" &middot; ");
+    out.writeStr(bssid_str);
+    out.writeStr("</div></td><td><div class='bar'><div class='fill ");
+    out.writeStr(color_cls);
+    out.writeStr("' style='width:");
+    out.writeInt((long)width);
+    out.writeStr("%'>");
