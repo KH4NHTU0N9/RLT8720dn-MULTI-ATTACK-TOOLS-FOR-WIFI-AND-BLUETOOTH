@@ -271,6 +271,23 @@ static void test_strict_int_and_http_request_parsers() {
     ASSERT_TRUE(parseStrictIntRange("5000", 1, 5000, &val));
     ASSERT_EQ_INT(val, 5000);
 
+    char method[12];
+    char path[64];
+    const char req1[] = "POST /deauth?foo=1 HTTP/1.1\r\nHost: 192.168.1.1\r\n\r\n";
+    ASSERT_TRUE(parseHttpRequestLine(req1, std::strlen(req1), method, sizeof(method), path, sizeof(path)));
+    ASSERT_STREQ(String(method), "POST");
+    ASSERT_STREQ(String(path), "/deauth");
+
+    const char bad_req[] = "BADREQUEST\r\n\r\n";
+    ASSERT_FALSE(parseHttpRequestLine(bad_req, std::strlen(bad_req), method, sizeof(method), path, sizeof(path)));
+    ASSERT_FALSE(parseHttpRequestLine("", 0, method, sizeof(method), path, sizeof(path)));
+
+    // Case-insensitive Content-Length extraction anchored cleanly at header line start
+    const char cl_lower[] = "POST /spam HTTP/1.1\r\nHost: 192.168.1.1\r\ncontent-length:   42 \r\n\r\n";
+    long cl = -1;
+    ASSERT_EQ_INT(extractHttpContentLength(cl_lower, std::strlen(cl_lower) - 4, &cl), 1);
+    ASSERT_EQ_INT(cl, 42);
+
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
