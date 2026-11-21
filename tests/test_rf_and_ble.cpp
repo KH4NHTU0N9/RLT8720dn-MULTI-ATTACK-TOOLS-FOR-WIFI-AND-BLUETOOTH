@@ -44,3 +44,17 @@ static int g_tests_failed = 0;
         }                                                                          \
     } while (0)
 
+#define ASSERT_STREQ(actual_str, expected_cstr)                                      \
+    do {                                                                             \
+        g_tests_run++;                                                               \
+        String _act = (actual_str);                                                  \
+        const char* _exp = (expected_cstr);                                          \
+        if (_act != _exp) {                                                          \
+            g_tests_failed++;                                                        \
+            std::fprintf(stderr, "FAIL [%s:%d]: expected \"%s\", got \"%s\"\n",      \
+                         __FILE__, __LINE__, _exp ? _exp : "(null)", _act.c_str());  \
+        }                                                                            \
+    } while (0)
+
+AppState g_app;
+
