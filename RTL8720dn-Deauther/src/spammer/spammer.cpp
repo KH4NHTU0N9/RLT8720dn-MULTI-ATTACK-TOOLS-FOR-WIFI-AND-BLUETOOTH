@@ -33,4 +33,21 @@ void SSIDSpammer::setRandomMode(bool enable, int count) {
     if (count > MAX_SPAM_NETWORKS) count = MAX_SPAM_NETWORKS;
     _randomCount = count;
 }
+
+void SSIDSpammer::start() {
+    if (_active) return;
+
+    if (_randomMode) {
+        clearSSIDs();
+        _networks.reserve((size_t)_randomCount);
+        for (int i = 0; i < _randomCount; i++) {
+            addSSID(_generateRandomSSID(8 + (int)random(8)));
+        }
+    }
+
+    if (_networks.empty()) {
+        DEBUG_SER_PRINT("[!] Spammer: No SSIDs to spam.\n");
+        return;
+    }
+
 }
