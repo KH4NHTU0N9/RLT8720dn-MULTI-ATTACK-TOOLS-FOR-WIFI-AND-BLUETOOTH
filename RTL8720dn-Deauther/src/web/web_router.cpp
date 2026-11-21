@@ -59,3 +59,22 @@ void webParsePostBody(const char* body, size_t body_len,
                 raw_key.reserve((unsigned int)(eq - start));
                 for (size_t k = start; k < eq; k++) raw_key += body[k];
 
+                String raw_val;
+                raw_val.reserve((unsigned int)(end - (eq + 1)));
+                for (size_t v = eq + 1; v < end; v++) raw_val += body[v];
+
+                out_params.push_back(std::make_pair(urlDecode(raw_key), urlDecode(raw_val)));
+            }
+        }
+        if (end >= body_len) break;
+        start = end + 1;
+    }
+}
+
+int webClampFramesPerDeauth(const String& raw, int fallback) {
+    long val = 0;
+    if (!parseStrictIntRange(raw, MIN_FRAMES_PER_DEAUTH, MAX_FRAMES_PER_DEAUTH, &val)) {
+        return fallback;
+    }
+    return (int)val;
+}
