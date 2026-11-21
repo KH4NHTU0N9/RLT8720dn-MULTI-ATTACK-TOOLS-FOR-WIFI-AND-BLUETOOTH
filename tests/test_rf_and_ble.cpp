@@ -132,3 +132,27 @@ static void test_packet_injection_frames_and_guards() {
     rltk_wlan_info = g_fake_wlan_storage;
     ASSERT_TRUE(wifi_tx_raw_frame(dummy, 24));
 
+    uint8_t src[6] = {0xAA, 0xBB, 0xCC, 0x11, 0x22, 0x33};
+    uint8_t dst[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+    // NAV Deauth must clamp Duration to IEEE80211_MAX_NAV_DURATION (0x7FFF, bit 15 = 0)
+    g_tx_frames.clear();
+    ASSERT_TRUE(wifi_tx_deauth_nav(src, dst, 0x07));
+    ASSERT_EQ_INT(g_tx_frames.size(), 1);
+    ASSERT_EQ_INT(g_tx_frames[0][0], 0xC0);
+    uint16_t nav_dur = 0;
+    std::memcpy(&nav_dur, &g_tx_frames[0][2], 2);
+    ASSERT_EQ_INT(nav_dur, 0x7FFF);
+
+    // Beacon must embed non-zero TSF and Supported Rates IE
+    g_tx_frames.clear();
+    mockAdvanceMillis(42);
+    ASSERT_TRUE(wifi_tx_beacon_frame(src, dst, "AuditNet"));
+    ASSERT_EQ_INT(g_tx_frames.size(), 1);
+    uint64_t tsf = 0;
+    std::memcpy(&tsf, &g_tx_frames[0][24], 8);
+    ASSERT_EQ_INT(tsf, 42000ULL);
+    const uint8_t* ies = &g_tx_frames[0][36];
+    const size_t ies_len = g_tx_frames[0].size() - 36;
+    ASSERT_TRUE(findTaggedIe(ies, ies_len, 0x00) != nullptr);
+    ASSERT_TRUE(findTaggedIe(ies, ies_len, 0x01) != nullptr);
