@@ -85,3 +85,21 @@ size_t bleScanDevices() {
     BLE.beginCentral(1);
     BLE.setScanCallback(_bleScanCallback);
 
+    BLEScan* pScan = BLE.configScan();
+    if (pScan != nullptr) {
+        // BLEScan::startScan(ms) blocks for ms and calls stopScan() internally
+        pScan->startScan(BLE_SCAN_DURATION_MS);
+    }
+
+    g_ble_scan_accepting = false;
+    BLE.setScanCallback(nullptr);
+    BLE.end();
+    return g_ble_results.size();
+}
+
+BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
+                                      const String& service_uuid,
+                                      const String& char_uuid,
+                                      const uint8_t* payload, size_t payload_len) {
+    if (!payload || payload_len == 0) return BleWriteStatus::BLE_WRITE_FAILED;
+
