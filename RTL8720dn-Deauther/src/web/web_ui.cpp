@@ -80,3 +80,20 @@ static const char kScript[] =
       "});"
     "});"
     "</script></body></html>";
+
+static void _renderStatusBanner(WebStream& out, const StatusNotice& notice) {
+    if (notice.kind == StatusKind::STATUS_NONE || notice.message[0] == '\0') return;
+    const char* cls = "info";
+    switch (notice.kind) {
+        case StatusKind::STATUS_OK:   cls = "ok";   break;
+        case StatusKind::STATUS_WARN: cls = "warn"; break;
+        case StatusKind::STATUS_ERR:  cls = "err";  break;
+        case StatusKind::STATUS_INFO:
+        default:                      cls = "info"; break;
+    }
+    out.writeStr("<div class='toast ");
+    out.writeStr(cls);
+    out.writeStr("'>");
+    out.writeHtmlEscaped(notice.message);
+    out.writeStr("</div>");
+}
