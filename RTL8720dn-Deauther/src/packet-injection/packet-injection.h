@@ -18,3 +18,27 @@ struct __attribute__((packed)) DeauthFrame {
   uint16_t reason = 0x06;
 };
 
+struct __attribute__((packed)) DisassocFrame {
+  uint16_t frame_control = 0xA0;
+  uint16_t duration = 0x0000;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+  uint16_t reason = 0x06;
+};
+
+struct __attribute__((packed)) BeaconFrame {
+  uint16_t frame_control = 0x80;
+  uint16_t duration = 0;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+  uint64_t timestamp = 0;
+  uint16_t beacon_interval = 0x64;
+  uint16_t ap_capabilities = 0x0411;
+  const uint8_t ssid_tag = 0;
+  uint8_t ssid_length = 0;
+  uint8_t ssid[255];
+};
