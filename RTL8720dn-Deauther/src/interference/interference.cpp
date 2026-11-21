@@ -96,6 +96,32 @@ static void _build_synthetic_payload(BeaconClone* t) {
         if (!t->payload) {
             t->state = INT_STATE_IDLE;
             return;
+        }
+        memcpy(t->payload, tpl_5g, tpl_len);
+        // Primary channel byte inside Tag 61 (HT Operation): 2 + 10 + 28 + 2 = offset 42
+        t->payload[42] = ch;
+        t->payload_len = tpl_len;
+    } else {
+        static const uint8_t tpl_24[] = {
+            0x00, 0x00,                                         // Tag 0: Hidden SSID
+            0x01, 0x08, 0x82, 0x84, 0x8B, 0x96,
+                        0x0C, 0x12, 0x18, 0x24,                 // Tag 1: 1,2,5.5,11,6,9,12,18M
+            0x03, 0x01, 0x00,                                   // Tag 3: DS Param (ch filled)
+            0x05, 0x04, 0x00, 0x01, 0x00, 0x00,                 // Tag 5: TIM
+            0x2A, 0x01, 0x00,                                   // Tag 42: ERP Info
+            0x32, 0x04, 0x30, 0x48, 0x60, 0x6C                  // Tag 50: 24,36,48,54M
+        };
+        const size_t tpl_len = sizeof(tpl_24);
+        t->payload = (uint8_t*)malloc(tpl_len);
+        if (!t->payload) {
+            t->state = INT_STATE_IDLE;
+            return;
+        }
+        memcpy(t->payload, tpl_24, tpl_len);
+        t->payload[14] = ch;
+        t->payload_len = tpl_len;
+    }
+    t->state = INT_STATE_ACTIVE;
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
