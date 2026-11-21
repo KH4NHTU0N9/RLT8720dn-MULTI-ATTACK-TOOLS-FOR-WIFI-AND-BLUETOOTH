@@ -151,6 +151,14 @@ static void test_decode_hex_payload() {
     ASSERT_EQ_INT(buf[2], 0xBE);
     ASSERT_EQ_INT(buf[3], 0xEF);
 
+    // Disallow splitting nibbles with spaces mid-byte
+    ASSERT_FALSE(decodeHexPayload("A B", buf, sizeof(buf), &out_len));
+
+    // Reject empty and odd-length strings
+    ASSERT_FALSE(decodeHexPayload("", buf, sizeof(buf), &out_len));
+    ASSERT_EQ_INT(out_len, 0);
+    ASSERT_FALSE(decodeHexPayload("   ", buf, sizeof(buf), &out_len));
+    ASSERT_FALSE(decodeHexPayload("0x", buf, sizeof(buf), &out_len));
     ASSERT_FALSE(decodeHexPayload("ABC", buf, sizeof(buf), &out_len));
 
     // Reject non-hex characters
