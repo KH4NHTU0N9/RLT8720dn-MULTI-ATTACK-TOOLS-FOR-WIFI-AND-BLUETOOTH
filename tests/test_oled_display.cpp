@@ -187,3 +187,17 @@ static void test_pre_init_guards_and_gpio_hardfault_fix() {
     ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
     ASSERT_EQ_INT(listener.wrong_addr_count, 0);
 
+    // Must send Display OFF (0xAE) ... Display ON (0xAF) and clear all 8 pages (1024 zero bytes)
+    ASSERT_TRUE(!listener.commands.empty());
+    ASSERT_EQ_INT(listener.commands.front(), 0xAE);
+    ASSERT_EQ_INT(listener.data_pages_written, 8);
+    ASSERT_EQ_INT(listener.data_bytes_written, 1024);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 0, 127, 63), 0);
+}
+
+static void test_dirty_page_diffing_and_screens() {
+    mockArduino().reset();
+    Ssd1306WireListener listener;
+    mockArduino().on_gpio_event = Ssd1306WireListener::gpioHook;
+    mockArduino().on_gpio_ctx = &listener;
+
