@@ -204,3 +204,17 @@ size_t bleBuildGoogleSpamPayload(uint8_t* out_buf, size_t cap, int rotation) {
     memcpy(out_buf, google, sizeof(google));
     return sizeof(google);
 }
+
+size_t bleBuildWindowsSpamPayload(uint8_t* out_buf, size_t cap, const uint8_t rand4[4]) {
+    if (!out_buf || cap < BLE_WINDOWS_PAYLOAD_LEN || !rand4) return 0;
+    const uint8_t windows[BLE_WINDOWS_PAYLOAD_LEN] = {
+        0x02, 0x01, 0x06,
+        0x03, 0x03, 0x00, 0xFE,
+        0x0A, 0x16, 0x00, 0xFE,
+        0x00, 0x01, 0x00,
+        rand4[0], rand4[1], rand4[2], rand4[3]
+    };
+    memcpy(out_buf, windows, sizeof(windows));
+    return sizeof(windows);
+}
+
