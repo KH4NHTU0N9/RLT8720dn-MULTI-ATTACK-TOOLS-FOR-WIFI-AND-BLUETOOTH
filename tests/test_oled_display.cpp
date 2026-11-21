@@ -84,3 +84,27 @@ struct Ssd1306WireListener {
         return cnt;
     }
 
+    void onByte(uint8_t b) {
+        if (byte_pos == 0) {
+            if (b != (OLED_I2C_ADDR << 1)) {
+                wrong_addr_count++;
+            }
+        } else if (byte_pos == 1) {
+            ctrl_byte = b;
+            if (ctrl_byte == 0x40) {
+                cur_col = col_start;
+                cur_page = page_start;
+                data_pages_written++;
+            }
+        } else if (ctrl_byte == 0x00) {
+            commands.push_back(b);
+            if (cmd_wait > 0) {
+                cmd_args[cmd_arg_pos++] = b;
+                cmd_wait--;
+                if (cmd_wait == 0) {
+                    if (pending_cmd == 0x21) {
+                        col_start = cmd_args[0] & 0x7FU;
+                        col_end = cmd_args[1] & 0x7FU;
+                    } else if (pending_cmd == 0x22) {
+                        page_start = cmd_args[0] & 0x07U;
+                        page_end = cmd_args[1] & 0x07U;
