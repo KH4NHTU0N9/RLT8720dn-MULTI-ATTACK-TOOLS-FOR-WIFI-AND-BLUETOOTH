@@ -90,3 +90,16 @@ void ledOff() {
     applyPins();
 }
 
+void ledShowIdle() {
+    ledSetColor(true, false, false);
+}
+
+void ledShowHttpBusy() {
+    if (!g_led_enabled) return;
+    g_g_state = true;
+    applyPins();
+}
+
+void ledShowAttackOff() {
+    ledOff();
+}
