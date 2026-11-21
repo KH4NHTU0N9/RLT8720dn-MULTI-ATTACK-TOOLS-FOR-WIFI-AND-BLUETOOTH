@@ -138,3 +138,27 @@ static void _extractPostParams(const char* raw_req, size_t req_len,
     }
     webParsePostBody(raw_req + hdr_end + 4, req_len - (hdr_end + 4), params);
 }
+
+static void _handleWifiAttackPost(const std::vector<std::pair<String, String>>& params,
+                                  bool is_interference,
+                                  IWebOutput& output,
+                                  void (*prepare_attack_cb)(void*), void* cb_ctx) {
+    g_deauth_channels.clear();
+    std::vector<int> targets;
+    targets.reserve(MAX_SCAN_RESULTS);
+
+    for (size_t i = 0; i < params.size(); i++) {
+        const String& k = params[i].first;
+        const String& v = params[i].second;
+        if (k == "target" || k == "network" || k == "interfere") {
+            long idx = -1;
+            if (parseStrictIntRange(v, 0, (long)g_scan_results.size() - 1, &idx)) {
+                targets.push_back((int)idx);
+            }
+        } else if (k == "frames") {
+            g_app.config.frames_per_deauth = webClampFramesPerDeauth(v, g_app.config.frames_per_deauth);
+        } else if (k == "reason") {
+            g_app.config.deauth_reason = webClampDeauthReason(v, g_app.config.deauth_reason);
+        }
+    }
+
