@@ -103,3 +103,13 @@ clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefine
   RTL8720dn-Deauther/src/wifi/wifi_scanner.cpp \
   RTL8720dn-Deauther/src/core/attack_runner.cpp \
   -o tests/bin/test_web_and_router && ./tests/bin/test_web_and_router
+```
+
+---
+
+## Cảnh báo trách nhiệm (Disclaimer)
+
+Bộ công cụ này được phát triển **CHỈ DÀNH CHO MỤC ĐÍCH GIÁO DỤC VÀ NGHIÊN CỨU BẢO MẬT (Educational & Authorized Lab Testing Purposes Only)**.
+
+* Chỉ sử dụng trên các thiết bị và hệ thống mạng do bạn sở hữu hoặc có sự cho phép rõ ràng bằng văn bản từ chủ sở hữu.
+* Người dùng tự chịu mọi trách nhiệm pháp lý đối với hành vi sử dụng không đúng mục đích.
