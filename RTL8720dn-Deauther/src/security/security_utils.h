@@ -148,4 +148,23 @@ static inline String parseBleDeviceName(const uint8_t* p_adv, size_t len) {
         offset += (size_t)ad_len + 1;
     }
     return String("[Unknown]");
+}
+
+// Safely copy a raw 802.11 SSID buffer without mutating the source SDK struct,
+// filtering non-printable control characters.
+static inline String sanitizeSsid(const uint8_t* raw_ssid, size_t raw_len) {
+    if (!raw_ssid || raw_len == 0) return String("");
+    char ssid_buf[MAX_SSID_BYTES + 1];
+    size_t copy_len = raw_len;
+    if (copy_len > MAX_SSID_BYTES) copy_len = MAX_SSID_BYTES;
+    size_t out_pos = 0;
+    for (size_t i = 0; i < copy_len; i++) {
+        uint8_t ch = raw_ssid[i];
+        if (ch >= 0x20 && ch != 0x7F) {
+            ssid_buf[out_pos++] = (char)ch;
+        }
+    }
+    ssid_buf[out_pos] = '\0';
+    return String(ssid_buf);
+}
 #endif // SECURITY_UTILS_H
