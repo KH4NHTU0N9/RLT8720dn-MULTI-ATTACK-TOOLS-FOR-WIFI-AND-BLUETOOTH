@@ -29,4 +29,25 @@ public:
     bool aborted() const { return _aborted; }
     size_t totalBytes() const { return _total_bytes; }
 
+    void writeBytes(const char* data, size_t len) {
+        if (_aborted || !data || len == 0) return;
+
+        size_t pos = 0;
+        while (pos < len) {
+            size_t avail = sizeof(_buf) - _len;
+            if (avail == 0) {
+                if (!flush()) return;
+                avail = sizeof(_buf);
+            }
+            size_t take = len - pos;
+            if (take > avail) take = avail;
+            memcpy(&_buf[_len], data + pos, take);
+            _len += take;
+            pos += take;
+            if (_len == sizeof(_buf)) {
+                if (!flush()) return;
+            }
+        }
+    }
+
 #endif // WEB_STREAM_H
