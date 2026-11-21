@@ -252,3 +252,17 @@ static void _renderBlePanel(WebStream& out, const AppState& app,
         }
     }
 
+    out.writeStr("</tbody></table></div><form method='post' action='/blewrite' style='margin-top:12px'>"
+                 "<div class='row'><div class='fld'><label>Target MAC</label>"
+                 "<input id='b_mac' type='text' name='mac' placeholder='AA:BB:CC:DD:EE:FF'></div>"
+                 "<div class='fld'><label>Address Type</label><select id='b_type' name='addr_type'>"
+                 "<option value='0'>Public (0)</option><option value='1'>Random (1)</option></select></div></div>"
+                 "<div class='row' style='margin-top:8px'><div class='fld'><label>Service UUID</label>"
+                 "<input type='text' name='service' placeholder='e.g. FFE0 or 128-bit UUID'></div>"
+                 "<div class='fld'><label>Characteristic UUID</label>"
+                 "<input type='text' name='char' placeholder='e.g. FFE1'></div></div>"
+                 "<div class='fld' style='margin-top:8px'><label>Hex Payload (e.g. 01FF or 01 FF)</label>"
+                 "<input type='text' name='data' placeholder='AABBCC'></div>"
+                 "<div class='acts'><button class='btn red' type='submit'>Connect &amp; Write GATT</button></div></form></div></div>");
+}
+
