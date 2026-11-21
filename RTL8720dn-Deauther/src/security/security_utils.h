@@ -259,4 +259,24 @@ static inline String buildHttpRedirectHeaders(const String& url) {
     response += "\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
     return response;
 }
+
+// Parse HTTP request line into method and path (strips optional ?query string).
+// Returns false on empty, missing method/path, or malformed request lines.
+static inline bool parseHttpRequestLine(const char* req, size_t req_len,
+                                        char* method_out, size_t method_cap,
+                                        char* path_out, size_t path_cap) {
+    if (!req || req_len == 0 || !method_out || method_cap < 2 || !path_out || path_cap < 2) {
+        return false;
+    }
+    // Find first space separating method and target
+    size_t sp1 = 0;
+    while (sp1 < req_len && req[sp1] != ' ' && req[sp1] != '\r' && req[sp1] != '\n') {
+        sp1++;
+    }
+    if (sp1 == 0 || sp1 >= req_len || req[sp1] != ' ' || sp1 >= method_cap) {
+        return false;
+    }
+    memcpy(method_out, req, sp1);
+    method_out[sp1] = '\0';
+
 #endif // SECURITY_UTILS_H
