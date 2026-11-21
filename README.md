@@ -62,3 +62,15 @@ Dự án cung cấp bộ mock phần cứng AmebaD (`tests/mock/`) và **4 suite
 ```sh
 mkdir -p tests/bin
 
+# 1. Security helpers, HTTP & string parsers (102 assertions)
+clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined \
+  -Itests/mock -IRTL8720dn-Deauther/src/security \
+  tests/test_security_fixes.cpp -o tests/bin/test_security_fixes && \
+  ./tests/bin/test_security_fixes
+
+# 2. OLED Software I2C GPIO safety & dirty-page diffing (32 assertions)
+clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefined \
+  -Itests/mock -IRTL8720dn-Deauther/src \
+  tests/test_oled_display.cpp RTL8720dn-Deauther/src/oled/oled_display.cpp \
+  -o tests/bin/test_oled_display && ./tests/bin/test_oled_display
+
