@@ -105,6 +105,13 @@ static inline bool decodeHexPayload(const String& hex_data, uint8_t* out_buf, si
             high_nibble = -1;
         }
     }
+
+    if (high_nibble >= 0 || byte_count == 0) {
+        *out_len = 0;
+        return false;
+    }
+
+    *out_len = byte_count;
     return true;
 }
 
