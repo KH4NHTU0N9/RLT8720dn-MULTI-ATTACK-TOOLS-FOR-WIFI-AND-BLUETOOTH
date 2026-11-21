@@ -100,3 +100,19 @@ struct __attribute__((packed)) CSAFrame {
   uint8_t new_channel = 1;
   uint8_t switch_count = 1;
 };
+
+extern uint8_t* rltk_wlan_info;
+extern "C" unsigned char rltk_wlan_running(unsigned char idx);
+extern "C" void* alloc_mgtxmitframe(void* ptr);
+extern "C" void update_mgntframe_attrib(void* ptr, void* frame_control);
+extern "C" int dump_mgntframe(void* ptr, void* frame_control);
+
+bool wifi_tx_raw_frame(void* frame, size_t length);
+bool wifi_tx_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason = 0x06, void* bssid = nullptr);
+bool wifi_tx_deauth_nav(void* src_mac, void* dst_mac, uint16_t reason = 0x06, void* bssid = nullptr);
+bool wifi_tx_disassoc_frame(void* src_mac, void* dst_mac, uint16_t reason = 0x06, void* bssid = nullptr);
+bool wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid);
+bool wifi_tx_auth_frame(void* src_mac, void* dst_mac);
+bool wifi_tx_assoc_frame(void* src_mac, void* dst_mac);
+bool wifi_tx_null_frame(void* src_mac, void* dst_mac);
+bool wifi_tx_probe_frame(void* src_mac, void* dst_mac);
