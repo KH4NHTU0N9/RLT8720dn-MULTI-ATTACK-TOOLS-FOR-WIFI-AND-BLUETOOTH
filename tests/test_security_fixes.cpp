@@ -288,6 +288,25 @@ static void test_strict_int_and_http_request_parsers() {
     ASSERT_EQ_INT(extractHttpContentLength(cl_lower, std::strlen(cl_lower) - 4, &cl), 1);
     ASSERT_EQ_INT(cl, 42);
 
+    const char cl_none[] = "GET / HTTP/1.1\r\nX-Other-Content-Length: 99\r\n\r\n";
+    ASSERT_EQ_INT(extractHttpContentLength(cl_none, std::strlen(cl_none) - 4, &cl), 0);
+    ASSERT_EQ_INT(cl, 0);
+
+    const char cl_bad[] = "POST / HTTP/1.1\r\nContent-Length: -5\r\n\r\n";
+    ASSERT_EQ_INT(extractHttpContentLength(cl_bad, std::strlen(cl_bad) - 4, &cl), -1);
+
+    const char cl_ovf[] = "POST / HTTP/1.1\r\nContent-Length: 99999999999999999999999999\r\n\r\n";
+    ASSERT_EQ_INT(extractHttpContentLength(cl_ovf, std::strlen(cl_ovf) - 4, &cl), -1);
+}
+
+int main() {
+    std::printf("Running RTL8720dn security unit tests...\n");
+    test_html_escape();
+    test_url_decode();
+    test_ble_device_name_parser();
+    test_decode_hex_payload();
+    test_ssid_mac_and_http_helpers();
+    test_strict_int_and_http_request_parsers();
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
