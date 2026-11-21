@@ -371,3 +371,26 @@ static void test_http_router_endpoints() {
         const char r[] = "POST /blewrite HTTP/1.1\r\n\r\nmac=AA:BB:CC:DD:EE:FF&addr_type=1&service=FFE0&char=FFE1&data=01+FF";
         ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
         ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_OK);
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /blespam HTTP/1.1\r\n\r\ntype=2";
+        ASSERT_TRUE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::BLE_SPAM);
+        ASSERT_EQ_INT(g_app.config.ble_spam_type, 2);
+    }
+}
+
+int main() {
+    std::printf("Running RTL8720dn WebStream, WebUI XSS & HTTP Router unit tests...\n");
+    test_web_stream_chunking_and_abort();
+    test_post_parser_and_clampers();
+    test_dashboard_ui_and_xss_protection();
+    test_http_router_endpoints();
+    if (g_tests_failed > 0) {
+        std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
+        return 1;
+    }
+    std::printf("PASSED: %d assertions\n", g_tests_run);
+    return 0;
+}
