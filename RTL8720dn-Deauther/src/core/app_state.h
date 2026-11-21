@@ -52,4 +52,18 @@ struct AppConfig {
     int ble_spam_type = 0;
     int current_channel = DEFAULT_AP_CHANNEL;
 };
+
+struct WiFiScanResult {
+    String ssid;
+    uint8_t bssid[6];
+    int16_t rssi;
+    uint8_t channel;
+};
+
+struct BLEAuditResult {
+    String name;
+    char address[18];
+    uint8_t addr_type;
+    int16_t rssi;
+};
 #endif // APP_STATE_H
