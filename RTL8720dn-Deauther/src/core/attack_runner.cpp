@@ -158,3 +158,26 @@ static void _runSpamLoop() {
         oled_show_spammer(ssid_count);
     }
 }
+
+void attackRunTick(WiFiServer& server) {
+    switch (g_app.attack_mode) {
+        case AttackMode::BLE_SPAM:
+            bleRunSpamLoop(g_app.config.ble_spam_type);
+            break;
+        case AttackMode::DEAUTH:
+            ledShowAttackOff();
+            _runDeauthLoop();
+            break;
+        case AttackMode::INTERFERENCE:
+            ledShowAttackOff();
+            _runInterferenceLoop(server);
+            break;
+        case AttackMode::BEACON_SPAM:
+            ledShowAttackOff();
+            _runSpamLoop();
+            break;
+        case AttackMode::IDLE:
+        default:
+            break;
+    }
+}
