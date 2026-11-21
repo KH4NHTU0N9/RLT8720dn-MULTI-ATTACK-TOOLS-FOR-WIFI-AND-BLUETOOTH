@@ -94,3 +94,19 @@ static void resetHarness() {
     Spammer.stop();
     Spammer.clearSSIDs();
 }
+
+static const uint8_t* findTaggedIe(const uint8_t* ie_start, size_t ie_len, uint8_t target_id) {
+    size_t pos = 0;
+    while (pos + 2 <= ie_len) {
+        uint8_t id = ie_start[pos];
+        uint8_t len = ie_start[pos + 1];
+        if (pos + 2 + len > ie_len) return nullptr;
+        if (id == target_id) return &ie_start[pos];
+        pos += 2 + len;
+    }
+    return nullptr;
+}
+
+static void test_packet_injection_frames_and_guards() {
+    resetHarness();
+
