@@ -266,3 +266,29 @@ static void _renderBlePanel(WebStream& out, const AppState& app,
                  "<div class='acts'><button class='btn red' type='submit'>Connect &amp; Write GATT</button></div></form></div></div>");
 }
 
+static void _renderSettingsPanel(WebStream& out, const AppState& app,
+                                 size_t ap_count, size_t ble_count,
+                                 bool led_enabled, size_t free_heap_bytes) {
+    out.writeStr("<div id='p_cfg' class='panel'>"
+                 "<div class='card'><div class='chd'><span>Attack Defaults</span></div>"
+                 "<form method='post' action='/setconfig'><div class='row'>"
+                 "<div class='fld'><label>Frames / target (1-5000)</label>"
+                 "<input type='number' name='frames' min='1' max='5000' value='");
+    out.writeInt((long)app.config.frames_per_deauth);
+    out.writeStr("'></div><div class='fld'><label>Default Reason</label><select name='reason'>");
+    _renderReasonOptions(out, app.config.deauth_reason);
+    out.writeStr("</select></div></div><div class='acts'>"
+                 "<button class='btn pri' type='submit'>Save Settings</button></div></form></div>"
+                 "<div class='card'><div class='chd'><span>Onboard RGB LED</span><span class='pill'>");
+    out.writeStr(led_enabled ? "ENABLED" : "DISABLED");
+    out.writeStr("</span></div><form method='post' action='");
+    out.writeStr(led_enabled ? "/led_disable" : "/led_enable");
+    out.writeStr("'><button class='btn ");
+    out.writeStr(led_enabled ? "red" : "ok");
+    out.writeStr("' type='submit'>");
+    out.writeStr(led_enabled ? "Turn Off LED" : "Turn On LED");
+    out.writeStr("</button></form></div>"
+                 "<div class='card'><div class='chd'><span>Device Info</span></div>"
+                 "<div class='kv'><span>SoftAP SSID</span><b>" DEFAULT_AP_SSID "</b></div>"
+                 "<div class='kv'><span>Web UI</span><b>" DEFAULT_WEBUI_IP "</b></div>"
+                 "<div class='kv'><span>Cached Wi-Fi APs</span><b>");
