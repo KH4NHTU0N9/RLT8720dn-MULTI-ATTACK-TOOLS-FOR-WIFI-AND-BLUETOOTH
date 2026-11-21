@@ -211,3 +211,23 @@ static void _renderSpamPanel(WebStream& out, const AppState& app) {
                  "<div class='acts'><button class='btn red' type='submit'>Start Beacon Flood</button></div>"
                  "</form></div></div>");
 }
+
+static void _renderBlePanel(WebStream& out, const AppState& app,
+                            const std::vector<BLEAuditResult>& ble_results) {
+    out.writeStr("<div id='p_ble' class='panel'>"
+                 "<div class='card'><div class='chd'><span>BLE Advertising Flooder</span></div>"
+                 "<form method='post' action='/blespam'><div class='row'>"
+                 "<div class='fld'><label>Flood Payload Type</label><select name='type'>"
+                 "<option value='0'");
+    if (app.config.ble_spam_type == 0) out.writeStr(" selected");
+    out.writeStr(">Apple Proximity Popup</option><option value='1'");
+    if (app.config.ble_spam_type == 1) out.writeStr(" selected");
+    out.writeStr(">Google Fast Pair</option><option value='2'");
+    if (app.config.ble_spam_type == 2) out.writeStr(" selected");
+    out.writeStr(">Windows Swift Pair</option></select></div></div>"
+                 "<div class='acts'><button class='btn red' type='submit'>Start BLE Flood</button></div></form></div>"
+                 "<div class='card'><div class='chd'><span>BLE GATT Auditor (");
+    out.writeUInt((unsigned long)ble_results.size());
+    out.writeStr(")</span><form method='post' action='/blescan'><button class='btn pri sm' type='submit'>Scan BLE</button></form></div>"
+                 "<div class='tbl-wrap'><table><thead><tr><th>Device</th><th>RSSI</th><th>Pick</th></tr></thead><tbody>");
+
