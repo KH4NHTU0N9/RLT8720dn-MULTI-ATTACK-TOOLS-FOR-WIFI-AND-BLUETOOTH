@@ -131,3 +131,25 @@ bool wifi_tx_assoc_frame(void* src_mac, void* dst_mac) {
   _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, dst_mac);
   return wifi_tx_raw_frame(&frame, sizeof(AssocFrame));
 }
+
+bool wifi_tx_null_frame(void* src_mac, void* dst_mac) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  NullFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, dst_mac);
+  return wifi_tx_raw_frame(&frame, sizeof(NullFrame));
+}
+
+bool wifi_tx_probe_frame(void* src_mac, void* dst_mac) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  ProbeRequest frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, dst_mac);
+  return wifi_tx_raw_frame(&frame, sizeof(ProbeRequest));
+}
+
+bool wifi_tx_csa_frame(void* src_mac, void* dst_mac, uint8_t target_channel) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  CSAFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, src_mac);
+  frame.new_channel = target_channel;
+  return wifi_tx_raw_frame(&frame, sizeof(CSAFrame));
+}
