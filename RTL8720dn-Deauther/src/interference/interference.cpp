@@ -172,6 +172,32 @@ static void _beacon_sniffer_cb(unsigned char* frame, unsigned int len, void* arg
 static void _finalize_captured_beacon() {
     if (!rx_captured_ready) return;
 
+    const int idx = rx_target_idx;
+    rx_captured_ready = false;
+    wifi_set_promisc((rtw_rcr_level_t)0, NULL, 0);
+
+    if (idx < 0 || idx >= num_targets || idx >= MAX_INTERFERENCE_TARGETS) return;
+    BeaconClone* t = &targets[idx];
+
+    t->beacon_interval = rx_beacon_interval;
+    t->capabilities = rx_capabilities;
+    if (t->payload) {
+        free(t->payload);
+        t->payload = NULL;
+    }
+    t->payload_len = 0;
+
+    if (rx_tags_len > 0 && rx_tags_len <= MAX_BEACON_TAGS_LEN) {
+        t->payload = (uint8_t*)malloc(rx_tags_len);
+        if (t->payload) {
+            memcpy(t->payload, rx_tags_buf, rx_tags_len);
+            t->payload_len = rx_tags_len;
+            t->state = INT_STATE_ACTIVE;
+            DEBUG_SER_PRINT("[+] INT: REAL beacon captured! CH");
+            DEBUG_SER_PRINT(t->target_channel);
+            DEBUG_SER_PRINT(" Tags=");
+            DEBUG_SER_PRINT((unsigned long)rx_tags_len);
+            DEBUG_SER_PRINTLN("B");
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
