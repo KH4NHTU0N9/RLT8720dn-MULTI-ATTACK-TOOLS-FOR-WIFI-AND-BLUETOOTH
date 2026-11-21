@@ -116,3 +116,8 @@ bool wifi_tx_auth_frame(void* src_mac, void* dst_mac);
 bool wifi_tx_assoc_frame(void* src_mac, void* dst_mac);
 bool wifi_tx_null_frame(void* src_mac, void* dst_mac);
 bool wifi_tx_probe_frame(void* src_mac, void* dst_mac);
+bool wifi_tx_csa_frame(void* src_mac, void* dst_mac, uint8_t target_channel);
+bool wifi_tx_raw_beacon(void* src_mac, void* dst_mac, uint8_t* payload, size_t payload_len, uint16_t interval = 0x64, uint16_t caps = 0x0411);
+bool wifi_tx_beacon_csa_frame(void* src_mac, void* dst_mac, const char *ssid, uint8_t target_channel);
+
+#endif // PACKET_INJECTION_H
