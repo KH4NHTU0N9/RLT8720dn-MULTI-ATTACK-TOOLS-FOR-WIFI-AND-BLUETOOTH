@@ -369,6 +369,32 @@ void oled_show_boot() {
     _text(18, 50, "v2.1 RTL8720DN", 1);
     _display();
 }
+
+void oled_show_scanning() {
+    if (!_initialized) return;
+    _clear();
+    _draw_header("  WIFI SCANNER");
+    _draw_sep(14);
+    _text(16, 25, "Scanning WiFi...", 1);
+    _rect(14, 38, 100, 10);
+    _fill_rect(16, 40, 50, 6, true);
+    _text(22, 52, "Please wait...", 1);
+    _display();
+}
+
+void oled_show_idle(int ap24, int ap5g) {
+    if (!_initialized) return;
+    _clear();
+    _draw_header(" DEAUTHER READY");
+    _draw_sep(14);
+    char buf[24];
+    int total = ap24 + ap5g;
+    if (total < 0) total = 0;
+    _text(4, 21, "Networks:", 1);
+    snprintf(buf, sizeof(buf), "%d", total);
+    _text(64, 17, buf, 2);
+    snprintf(buf, sizeof(buf), "2.4G:%d  5G:%d", ap24, ap5g);
+    _text(4, 36, buf, 1);
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
