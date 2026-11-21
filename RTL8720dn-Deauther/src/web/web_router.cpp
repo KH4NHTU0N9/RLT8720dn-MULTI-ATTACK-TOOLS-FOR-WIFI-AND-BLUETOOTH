@@ -428,3 +428,22 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (strcmp(path, "/spam") == 0) {
+        _handleSpamPost(params, output, prepare_attack_cb, cb_ctx);
+        return (g_app.attack_mode == AttackMode::BEACON_SPAM);
+    }
+
+    if (strcmp(path, "/blescan") == 0) {
+        size_t found = 0;
+#ifndef UNIT_TEST
+        found = bleScanDevices();
+#else
+        found = g_ble_results.size();
+#endif
+        char msg[64];
+        snprintf(msg, sizeof(msg), "BLE scan finished: %lu devices.", (unsigned long)found);
+        g_app.notice.set(StatusKind::STATUS_OK, msg);
+        _writeRedirect(output, "/");
+        return false;
+    }
+
