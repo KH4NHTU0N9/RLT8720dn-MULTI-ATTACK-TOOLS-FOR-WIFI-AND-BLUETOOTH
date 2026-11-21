@@ -12,3 +12,23 @@
 #include "spammer/spammer.h"
 #include "web/web_router.h"
 #include "web/web_stream.h"
+#include "web/web_ui.h"
+#include "wifi/wifi_scanner.h"
+
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+
+static int g_tests_run = 0;
+static int g_tests_failed = 0;
+
+#define ASSERT_TRUE(cond)                                                          \
+    do {                                                                           \
+        g_tests_run++;                                                             \
+        if (!(cond)) {                                                             \
+            g_tests_failed++;                                                      \
+            std::fprintf(stderr, "FAIL [%s:%d]: %s\n", __FILE__, __LINE__, #cond); \
+        }                                                                          \
+    } while (0)
+
