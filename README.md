@@ -74,3 +74,17 @@ clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefine
   tests/test_oled_display.cpp RTL8720dn-Deauther/src/oled/oled_display.cpp \
   -o tests/bin/test_oled_display && ./tests/bin/test_oled_display
 
+# 3. Packet framing, Spammer, Interference sniffer safety, LED & BLE (129 assertions)
+clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefined \
+  -Itests/mock -IRTL8720dn-Deauther/src \
+  tests/test_rf_and_ble.cpp \
+  RTL8720dn-Deauther/src/packet-injection/packet-injection.cpp \
+  RTL8720dn-Deauther/src/spammer/spammer.cpp \
+  RTL8720dn-Deauther/src/interference/interference.cpp \
+  RTL8720dn-Deauther/src/core/led_controller.cpp \
+  RTL8720dn-Deauther/src/ble/ble_manager.cpp \
+  RTL8720dn-Deauther/src/wifi/wifi_scanner.cpp \
+  RTL8720dn-Deauther/src/oled/oled_display.cpp \
+  RTL8720dn-Deauther/src/core/attack_runner.cpp \
+  -o tests/bin/test_rf_and_ble && ./tests/bin/test_rf_and_ble
+
