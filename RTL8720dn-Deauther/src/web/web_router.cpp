@@ -78,3 +78,19 @@ int webClampFramesPerDeauth(const String& raw, int fallback) {
     }
     return (int)val;
 }
+
+uint16_t webClampDeauthReason(const String& raw, uint16_t fallback) {
+    long val = 0;
+    if (!parseStrictIntRange(raw, 1, 65535, &val)) {
+        return fallback;
+    }
+    return (uint16_t)val;
+}
+
+int webClampBeaconsPerSsid(const String& raw, int fallback) {
+    long val = 0;
+    if (!parseStrictIntRange(raw, 1, MAX_BEACONS_PER_SSID, &val)) {
+        return fallback;
+    }
+    return (int)val;
+}
