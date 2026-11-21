@@ -390,3 +390,26 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (strcmp(path, "/deauth") == 0) {
+        _handleWifiAttackPost(params, false, output, prepare_attack_cb, cb_ctx);
+        return (g_app.attack_mode == AttackMode::DEAUTH);
+    }
+
+    if (strcmp(path, "/interfere") == 0 || strcmp(path, "/interference") == 0) {
+        _handleWifiAttackPost(params, true, output, prepare_attack_cb, cb_ctx);
+        return (g_app.attack_mode == AttackMode::INTERFERENCE);
+    }
+
+    if (strcmp(path, "/setframes") == 0 || strcmp(path, "/setconfig") == 0) {
+        for (size_t i = 0; i < params.size(); i++) {
+            if (params[i].first == "frames") {
+                g_app.config.frames_per_deauth = webClampFramesPerDeauth(params[i].second, g_app.config.frames_per_deauth);
+            } else if (params[i].first == "reason") {
+                g_app.config.deauth_reason = webClampDeauthReason(params[i].second, g_app.config.deauth_reason);
+            }
+        }
+        g_app.notice.set(StatusKind::STATUS_OK, "Attack settings saved.");
+        _writeRedirect(output, "/");
+        return false;
+    }
+
