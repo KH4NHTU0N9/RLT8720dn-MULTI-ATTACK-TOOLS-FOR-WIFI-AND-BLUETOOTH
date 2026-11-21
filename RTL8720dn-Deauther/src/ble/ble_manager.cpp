@@ -271,3 +271,8 @@ void bleRunSpamLoop(int spam_type) {
         oled_show_ble_spam(spam_type, g_app.sent_frames);
     }
 
+    BLE.configAdvert()->stopAdv();
+    delay(BLE_ADV_STOP_SETTLE_MS);
+    BLE.end();
+    ledShowIdle();
+}
