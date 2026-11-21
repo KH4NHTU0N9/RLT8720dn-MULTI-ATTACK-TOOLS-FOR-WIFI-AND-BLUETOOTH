@@ -1,41 +1,20 @@
 #include "oled_display.h"
+#include <stdio.h>
+#include <string.h>
 
 // ===================================================================
 // Self-Contained SSD1306 OLED Driver for BW16 (RTL8720DN)
-// Uses SOFTWARE I2C — bypasses Wire library pin validation bug
-// Only needs basic GPIO: pinMode(), digitalWrite(), digitalRead()
-//
-// Hardware: SSD1306 128x64 I2C, address 0x3C
-// Wiring:  PA26 (Arduino pin 8) → SDA
-//          PA25 (Arduino pin 7) → SCL
+// Uses Software I2C with dirty-page diffing and cached GPIO states.
 // ===================================================================
 
-// --- Pin Config (BW16 Arduino numbering) ---
 #define OLED_SDA  8    // PA26 = Arduino pin 8 on BW16
 #define OLED_SCL  7    // PA25 = Arduino pin 7 on BW16
-#define OLED_ADDR 0x3C
+#define OLED_FB_BYTES (OLED_SCREEN_WIDTH * OLED_PAGE_COUNT)
 
 // --- State ---
-static uint8_t  _fb[1024];        // 128×64 framebuffer (1 bit/pixel)
-static bool     _initialized  = false;
-static uint32_t _last_refresh = 0;
-static uint32_t _attack_start = 0;
-static uint8_t  _anim_frame   = 0;
-static const char _spinner[] = { '|', '/', '-', '\\' };
-
-// ===================================================================
-// SOFTWARE I2C (bit-bang, open-drain SDA, push-pull SCL)
-// ===================================================================
-static void _sda_high() { pinMode(OLED_SDA, INPUT);  }            // Release (pull-up)
-static void _sda_low()  { digitalWrite(OLED_SDA, LOW); pinMode(OLED_SDA, OUTPUT); }
-static void _scl_high() { digitalWrite(OLED_SCL, HIGH); }
-static void _scl_low()  { digitalWrite(OLED_SCL, LOW);  }
-static void _i2c_dly()  { delayMicroseconds(2); }
-
-static void _i2c_init() {
-    digitalWrite(OLED_SDA, LOW);   // Pre-set output register LOW for open-drain
-    pinMode(OLED_SCL, OUTPUT);
-    _scl_high();
+static uint8_t  _fb[OLED_FB_BYTES];
+static uint8_t  _prev_fb[OLED_FB_BYTES];
+static bool     _force_redraw = true;
     _sda_high();
     _i2c_dly();
 }
