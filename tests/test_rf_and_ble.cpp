@@ -262,3 +262,23 @@ static void test_interference_sniffer_deadlock_and_synthetic_fallback() {
     mockWifiInjectPromiscFrame(wrong_bssid, 40);
     ASSERT_FALSE(is_captured());
 
+    // Valid beacon from target_mac MUST stage without calling wifi_set_promisc() inside callback!
+    uint8_t real_beacon[48] = {0};
+    real_beacon[0] = 0x80;
+    real_beacon[1] = 0x00;
+    std::memcpy(&real_beacon[16], target_mac, 6);
+    real_beacon[32] = 0x64; real_beacon[33] = 0x00;
+    real_beacon[34] = 0x11; real_beacon[35] = 0x04;
+    real_beacon[36] = 0x00; real_beacon[37] = 0x04;
+    real_beacon[38] = 'V'; real_beacon[39] = 'I'; real_beacon[40] = 'P'; real_beacon[41] = '5';
+    real_beacon[42] = 0x01; real_beacon[43] = 0x02; real_beacon[44] = 0x8C; real_beacon[45] = 0x12;
+    mockWifiInjectPromiscFrame(real_beacon, 46);
+    ASSERT_FALSE(mockWifi().self_deadlock_detected);
+
+    // Main loop finalizes capture and disarms promisc safely outside RX thread
+    uint32_t sent = run_interference_cycle();
+    ASSERT_TRUE(sent > 0);
+    ASSERT_TRUE(is_captured());
+    ASSERT_EQ_INT(get_interference_state(), INT_STATE_ACTIVE);
+    ASSERT_EQ_INT(mockWifi().promisc_level, RTW_PROMISC_DISABLE);
+
