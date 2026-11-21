@@ -156,3 +156,27 @@ static void test_packet_injection_frames_and_guards() {
     const size_t ies_len = g_tx_frames[0].size() - 36;
     ASSERT_TRUE(findTaggedIe(ies, ies_len, 0x00) != nullptr);
     ASSERT_TRUE(findTaggedIe(ies, ies_len, 0x01) != nullptr);
+
+    // 2.4 GHz CSA Beacon (ch 6): Tag 3 (DS), Tag 37 (CSA, len=3), Tag 60 (ECSA, len=4, op=81)
+    g_tx_frames.clear();
+    ASSERT_TRUE(wifi_tx_beacon_csa_frame(src, dst, "Test24", 6));
+    const auto& csa24 = g_tx_frames[0];
+    const uint8_t* ds24 = findTaggedIe(&csa24[36], csa24.size() - 36, 3);
+    const uint8_t* e37_24 = findTaggedIe(&csa24[36], csa24.size() - 36, 37);
+    const uint8_t* e60_24 = findTaggedIe(&csa24[36], csa24.size() - 36, 60);
+    ASSERT_TRUE(ds24 != nullptr && ds24[2] == 6);
+    ASSERT_TRUE(e37_24 != nullptr && e37_24[1] == 3 && e37_24[3] == 6);
+    ASSERT_TRUE(e60_24 != nullptr && e60_24[1] == 4 && e60_24[2] == 1 && e60_24[3] == 81 && e60_24[4] == 6);
+
+    // 5 GHz CSA Beacons: MUST OMIT Tag 3 (DS Param) and set exact IEEE Operating Class!
+    const struct { uint8_t ch; uint8_t op; } cases5g[] = {
+        {36, 115}, {52, 118}, {100, 121}, {149, 124}
+    };
+    for (size_t i = 0; i < sizeof(cases5g) / sizeof(cases5g[0]); i++) {
+        g_tx_frames.clear();
+        ASSERT_TRUE(wifi_tx_beacon_csa_frame(src, dst, "Test5G", cases5g[i].ch));
+        const auto& csa5 = g_tx_frames[0];
+        ASSERT_TRUE(findTaggedIe(&csa5[36], csa5.size() - 36, 3) == nullptr);
+        const uint8_t* e60 = findTaggedIe(&csa5[36], csa5.size() - 36, 60);
+        ASSERT_TRUE(e60 != nullptr);
+        ASSERT_EQ_INT(e60[1], 4);
