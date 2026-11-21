@@ -36,4 +36,16 @@ struct MockWifiState {
         promisc_len_used = 0;
         enter_promisc_calls = 0;
         set_promisc_calls = 0;
+        in_promisc_callback = false;
+        self_deadlock_detected = false;
+        active_scan_handler = nullptr;
+        canned_scan_results.clear();
+    }
+};
+
+inline MockWifiState& mockWifi() {
+    static MockWifiState st;
+    return st;
+}
+
 #endif // MOCK_WIFI_CONF_H
