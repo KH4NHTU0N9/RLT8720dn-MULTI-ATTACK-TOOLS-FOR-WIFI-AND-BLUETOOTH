@@ -64,4 +64,18 @@ void SSIDSpammer::stop() {
     _active = false;
     DEBUG_SER_PRINT("[-] Spammer: Stopped.\n");
 }
+
+void SSIDSpammer::_hopChannelIfDue() {
+    uint32_t now = millis();
+    if ((uint32_t)(now - _lastChannelHop) >= 100) {
+        _currentChannel++;
+        if (_currentChannel > 13) _currentChannel = 1;
+        wext_set_channel(WLAN0_NAME, _currentChannel);
+        _lastChannelHop = now;
+    }
+}
+
+uint32_t SSIDSpammer::run() {
+    if (!_active || _networks.empty()) return 0;
+
 }
