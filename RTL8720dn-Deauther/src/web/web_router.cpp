@@ -334,3 +334,22 @@ static bool _isKnownPostRoute(const char* path) {
     }
     return false;
 }
+
+bool webRouteRawRequest(const char* raw_req, size_t req_len,
+                        IWebOutput& output,
+                        bool (*post_scan_cb)(void* ctx),
+                        void (*prepare_attack_cb)(void* ctx),
+                        void* cb_ctx) {
+    char method[12];
+    char path[64];
+    if (!parseHttpRequestLine(raw_req, req_len, method, sizeof(method), path, sizeof(path))) {
+        webRenderPlainError(output, 400, "Bad Request");
+        return false;
+    }
+
+    if (strcmp(path, "/favicon.ico") == 0) {
+        String hdr = buildHttpResponseHeaders(204, "text/plain");
+        output.writeBytes((const uint8_t*)hdr.c_str(), hdr.length());
+        return false;
+    }
+
