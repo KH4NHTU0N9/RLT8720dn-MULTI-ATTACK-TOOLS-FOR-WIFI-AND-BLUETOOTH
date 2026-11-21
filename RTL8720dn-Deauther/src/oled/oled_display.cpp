@@ -436,36 +436,24 @@ void oled_show_interference(int active, int max_t) {
     _display();
 }
 
-// --- BLE SPAM SCREEN ---
 void oled_show_ble_spam(int type, uint32_t packets) {
     if (!_initialized || !_should_refresh()) return;
     _clear();
     _draw_header(" > BLE FLOOD");
-    _draw_sep(15);
+    _draw_sep(14);
     _text(4, 18, "Type: ", 1);
     switch (type) {
-        case 0:  _text(40, 18, "Apple Popup", 1);    break;
-        case 1:  _text(40, 18, "Google FastPair", 1); break;
-        case 2:  _text(40, 18, "Win SwiftPair", 1);   break;
-        default: _text(40, 18, "Unknown", 1);          break;
+        case 0:  _text(40, 18, "Apple Popup", 1); break;
+        case 1:  _text(40, 18, "G. FastPair", 1); break;
+        case 2:  _text(40, 18, "Win SwiftPair", 1); break;
+        default: _text(40, 18, "Unknown", 1); break;
     }
     _draw_sep(28);
     _text(4, 31, "Packets:", 1);
-    _draw_big_num(4, 40, packets);
+    _draw_big_num(4, 39, packets);
     _draw_footer(_attack_start);
     _display();
 }
-
-// --- BEACON SPAMMER SCREEN ---
-void oled_show_spammer(int ssid_count) {
-    if (!_initialized || !_should_refresh()) return;
-    _clear();
-    _draw_header(" > SSID FLOOD");
-    _draw_sep(15);
-    char buf[16];
-    snprintf(buf, sizeof(buf), "%d", ssid_count);
-    _text(4, 18, "SSIDs: ", 1);
-    _text(46, 12, buf, 2);
     _text(4, 38, "Mode: Beacon Flood", 1);
     _draw_footer(_attack_start);
     _display();
