@@ -227,3 +227,23 @@ static void test_spammer_module() {
     Spammer.stop();
     ASSERT_FALSE(Spammer.isActive());
 }
+
+static void test_interference_sniffer_deadlock_and_synthetic_fallback() {
+    resetHarness();
+
+    // TLV sanitizer rejects truncated/corrupt IEs while keeping valid complete IEs
+    const uint8_t valid_plus_trunc[] = {
+        0x00, 0x03, 'A', 'P', '1',
+        0x03, 0x01, 0x06,
+        0x3D, 0x16, 0x00, 0x01 // truncated HT Operation claiming 22 bytes
+    };
+    ASSERT_EQ_INT(interference_sanitize_beacon_tags(valid_plus_trunc, sizeof(valid_plus_trunc), 400), 8);
+    ASSERT_EQ_INT(interference_sanitize_beacon_tags(nullptr, 10, 400), 0);
+
+    uint8_t target_mac[6] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
+    start_interference(target_mac, 36);
+    ASSERT_EQ_INT(get_interference_state(), INT_STATE_CAPTURING);
+    ASSERT_EQ_INT(mockWifi().promisc_level, RTW_PROMISC_ENABLE_2);
+    ASSERT_EQ_INT(mockWifi().promisc_len_used, 1);
+    ASSERT_TRUE(mockWifi().promisc_cb != nullptr);
+
