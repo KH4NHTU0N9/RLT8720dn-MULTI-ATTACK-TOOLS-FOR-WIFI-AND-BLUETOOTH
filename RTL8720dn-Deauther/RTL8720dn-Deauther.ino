@@ -733,239 +733,238 @@ void loop() {
     if (req_oversized) {
       client.write("HTTP/1.1 413 Payload Too Large\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nPayload Too Large");
       client.stop();
-      if (led) {
+    } else {
+      DEBUG_SER_PRINT(request);
+      String path = parseRequest(request);
+      DEBUG_SER_PRINT("\nRequested path: " + path + "\n");
+      bool client_stopped = false;
+
+      if (path == "/") {
+        handleRoot(client);
+      } else if (path == "/rescan") {
+        client.write(makeRedirect("/").c_str());
+        oled_show_scanning();  // OLED: show scanning screen
+        scanNetworks();
+        channel_needs_restore = true;
+        // OLED: update idle screen with new AP counts
+        {
+          int c24 = 0, c5g = 0;
+          for (uint i = 0; i < scan_results.size(); i++) {
+            if (scan_results[i].channel <= 14) c24++;
+            else c5g++;
+          }
+          oled_show_idle(c24, c5g);
+        }
+      } else if (path == "/deauth") {
+        std::vector<std::pair<String, String>> post_data = parsePost(request);
+        deauth_channels.clear();
+        chs_idx.clear();
+        // Collect interfere targets (multi-target support)
+        std::vector<int> interfere_indices;
+        
+        for (auto &param : post_data) {
+          if (param.first == "network") {
+            int idx = String(param.second).toInt();
+            if (idx >= 0 && idx < (int)scan_results.size()) {
+              int ch = scan_results[idx].channel;
+              deauth_channels[ch].push_back(idx);
+              chs_idx.push_back(ch);
+            }
+          } else if (param.first == "reason") {
+            deauth_reason = String(param.second).toInt();
+          } else if (param.first == "interfere") {
+            // Multi-target interference checkbox
+            int val = String(param.second).toInt();
+            if (val >= 0 && val < (int)scan_results.size()) {
+              interfere_indices.push_back(val);
+            }
+          }
+        }
+
+        // BUG FIX #7: Send response BEFORE killing WiFi
+        client.write(makeRedirect("/").c_str());
+        client.stop();
+        delay(50); // Let TCP flush
+
+        if (!interfere_indices.empty()) {
+            // === Channel Interference Mode (single OR multi-target) ===
+            isInterfering = true;
+            server.stop();
+            wifi_off();
+            delay(100);
+            wifi_on(RTW_MODE_STA);
+            delay(500);
+            if (interfere_indices.size() == 1) {
+                // Single target: use classic path (captures real beacon)
+                int idx = interfere_indices[0];
+                start_interference(scan_results[idx].bssid, scan_results[idx].channel);
+            } else {
+                // Multi-target: initialize multi session then add each target
+                start_interference_multi();
+                for (int idx : interfere_indices) {
+                    add_interference_target(scan_results[idx].bssid, scan_results[idx].channel);
+                }
+            }
+        } else if (!deauth_channels.empty()) {
+            // === Multi-Target Deauth Mode ===
+            isDeauthing = true;
+            server.stop(); 
+            wifi_off(); 
+            delay(100); 
+            wifi_on(RTW_MODE_STA);
+            delay(100);
+        }
+        // Skip the client.stop() at the end since we already did it
+        client_stopped = true;
+      } else if (path == "/interference") {
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/setframes") {
+        std::vector<std::pair<String, String>> post_data = parsePost(request);
+        for (auto &param : post_data) {
+          if (param.first == "frames") {
+            int frames = String(param.second).toInt();
+            frames_per_deauth = frames <= 0 ? 100 : frames;
+          }
+        }
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/led_enable") {
+        led = true;
+        digitalWrite(LED_R, HIGH);
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/led_disable") {
+        led = false;
+        digitalWrite(LED_R, LOW);
         digitalWrite(LED_G, LOW);
-      }
-      goto end_request;
-    }
-    DEBUG_SER_PRINT(request);
-    String path = parseRequest(request);
-    DEBUG_SER_PRINT("\nRequested path: " + path + "\n");
-
-    if (path == "/") {
-      handleRoot(client);
-    } else if (path == "/rescan") {
-      client.write(makeRedirect("/").c_str());
-      oled_show_scanning();  // OLED: show scanning screen
-      scanNetworks();
-      channel_needs_restore = true;
-      // OLED: update idle screen with new AP counts
-      {
-        int c24 = 0, c5g = 0;
-        for (uint i = 0; i < scan_results.size(); i++) {
-          if (scan_results[i].channel <= 14) c24++;
-          else c5g++;
-        }
-        oled_show_idle(c24, c5g);
-      }
-    } else if (path == "/deauth") {
-      std::vector<std::pair<String, String>> post_data = parsePost(request);
-      deauth_channels.clear();
-      chs_idx.clear();
-      // Collect interfere targets (multi-target support)
-      std::vector<int> interfere_indices;
-      
-      for (auto &param : post_data) {
-        if (param.first == "network") {
-          int idx = String(param.second).toInt();
-          if (idx >= 0 && idx < (int)scan_results.size()) {
-            int ch = scan_results[idx].channel;
-            deauth_channels[ch].push_back(idx);
-            chs_idx.push_back(ch);
-          }
-        } else if (param.first == "reason") {
-          deauth_reason = String(param.second).toInt();
-        } else if (param.first == "interfere") {
-          // Multi-target interference checkbox
-          int val = String(param.second).toInt();
-          if (val >= 0 && val < (int)scan_results.size()) {
-            interfere_indices.push_back(val);
+        digitalWrite(LED_B, LOW);
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/spam") {
+        std::vector<std::pair<String, String>> post_data = parsePost(request);
+        spam_ssids.clear();
+        for (auto &param : post_data) {
+          if (param.first == "ssids") {
+            String ssids_raw = param.second;
+            ssids_raw.replace("\r", "");
+            int start = 0;
+            int end = ssids_raw.indexOf('\n');
+            while (end != -1) {
+              String s = ssids_raw.substring(start, end);
+              s.trim();
+              if (s.length() > 0 && spam_ssids.size() < 64) spam_ssids.push_back(s);
+              start = end + 1;
+              end = ssids_raw.indexOf('\n', start);
+            }
+            String s = ssids_raw.substring(start);
+            s.trim();
+            if (s.length() > 0 && spam_ssids.size() < 64) spam_ssids.push_back(s);
+          } else if (param.first == "count") {
+            int count = String(param.second).toInt();
+            beacons_per_ssid = (count > 0 && count <= 20) ? count : 3;
           }
         }
-      }
-
-      // BUG FIX #7: Send response BEFORE killing WiFi
-      client.write(makeRedirect("/").c_str());
-      client.stop();
-      delay(50); // Let TCP flush
-
-      if (!interfere_indices.empty()) {
-          // === Channel Interference Mode (single OR multi-target) ===
-          isInterfering = true;
+        if (!spam_ssids.empty()) {
+          isSpamming = true;
+          Spammer.clearSSIDs();
+          for (const String& s : spam_ssids) {
+              for (int i = 0; i < beacons_per_ssid; i++) {
+                  Spammer.addSSID(s);
+              }
+          }
+          
           server.stop();
           wifi_off();
           delay(100);
           wifi_on(RTW_MODE_STA);
-          delay(500);
-          if (interfere_indices.size() == 1) {
-              // Single target: use classic path (captures real beacon)
-              int idx = interfere_indices[0];
-              start_interference(scan_results[idx].bssid, scan_results[idx].channel);
-          } else {
-              // Multi-target: initialize multi session then add each target
-              start_interference_multi();
-              for (int idx : interfere_indices) {
-                  add_interference_target(scan_results[idx].bssid, scan_results[idx].channel);
-              }
-          }
-      } else if (!deauth_channels.empty()) {
-          // === Multi-Target Deauth Mode ===
-          isDeauthing = true;
-          server.stop(); 
-          wifi_off(); 
-          delay(100); 
-          wifi_on(RTW_MODE_STA);
           delay(100);
-      }
-      // Skip the client.stop() at the end since we already did it
-      goto end_request;
-    } else if (path == "/interference") {
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/setframes") {
-      std::vector<std::pair<String, String>> post_data = parsePost(request);
-      for (auto &param : post_data) {
-        if (param.first == "frames") {
-          int frames = String(param.second).toInt();
-          frames_per_deauth = frames <= 0 ? 100 : frames;
+          
+          Spammer.start();
         }
-      }
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/led_enable") {
-      led = true;
-      digitalWrite(LED_R, HIGH);
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/led_disable") {
-      led = false;
-      digitalWrite(LED_R, LOW);
-      digitalWrite(LED_G, LOW);
-      digitalWrite(LED_B, LOW);
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/spam") {
-      std::vector<std::pair<String, String>> post_data = parsePost(request);
-      spam_ssids.clear();
-      for (auto &param : post_data) {
-        if (param.first == "ssids") {
-          String ssids_raw = param.second;
-          ssids_raw.replace("\r", "");
-          int start = 0;
-          int end = ssids_raw.indexOf('\n');
-          while (end != -1) {
-            String s = ssids_raw.substring(start, end);
-            s.trim();
-            if (s.length() > 0 && spam_ssids.size() < 64) spam_ssids.push_back(s);
-            start = end + 1;
-            end = ssids_raw.indexOf('\n', start);
-          }
-          String s = ssids_raw.substring(start);
-          s.trim();
-          if (s.length() > 0 && spam_ssids.size() < 64) spam_ssids.push_back(s);
-        } else if (param.first == "count") {
-          int count = String(param.second).toInt();
-          beacons_per_ssid = (count > 0 && count <= 20) ? count : 3;
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/blescan") {
+        BLE.end();
+        BLE.init();
+        BLE.beginCentral(1);
+        BLE.setScanCallback(bleScanCallback);
+        ble_results.clear();
+        BLEScan* pScan = BLE.configScan();
+        if (pScan != nullptr) {
+          pScan->startScan(3000);
+          delay(3500);
+          pScan->stopScan();
         }
-      }
-      if (!spam_ssids.empty()) {
-        isSpamming = true;
-        Spammer.clearSSIDs();
-        for (const String& s : spam_ssids) {
-            for (int i = 0; i < beacons_per_ssid; i++) {
-                Spammer.addSSID(s);
+        BLE.setScanCallback(nullptr);
+        BLE.end();
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/blewrite") {
+        std::vector<std::pair<String, String>> post_data = parsePost(request);
+        String mac, service_uuid, char_uuid, hex_data;
+        for (auto &param : post_data) {
+            if (param.first == "mac") mac = param.second;
+            else if (param.first == "service") service_uuid = param.second;
+            else if (param.first == "char") char_uuid = param.second;
+            else if (param.first == "data") hex_data = param.second;
+        }
+        
+        if (mac.length() > 0 && hex_data.length() > 0) {
+            BLE.end();
+            BLE.init();
+            BLE.beginCentral(1);
+            // AmebaD kết nối qua configConnection
+            BLEConnect* pConn = BLE.configConnection();
+            if (pConn != nullptr && pConn->connect((char*)mac.c_str(), GAP_REMOTE_ADDR_LE_PUBLIC, 2000)) {
+                BLEClient* pClient = BLE.addClient(0);
+                if (pClient != nullptr) {
+                    pClient->discoverServices();
+                    unsigned long start = millis();
+                    while(!pClient->discoveryDone() && millis() - start < 5000) delay(100);
+                    
+                    BLERemoteService* pService = pClient->getService(service_uuid.c_str());
+                    if (pService != nullptr) {
+                        BLERemoteCharacteristic* pChar = pService->getCharacteristic(char_uuid.c_str());
+                        if (pChar != nullptr) {
+                            uint8_t val[MAX_BLE_WRITE_BYTES];
+                            size_t decoded_len = 0;
+                            if (decodeHexPayload(hex_data, val, sizeof(val), &decoded_len) && decoded_len > 0) {
+                                pChar->setData(val, (uint16_t)decoded_len);
+                            }
+                        }
+                    }
+                }
+                pConn->disconnect(0);
             }
+            BLE.end();
         }
+        client.write(makeRedirect("/").c_str());
+      } else if (path == "/blespam") {
+        std::vector<std::pair<String, String>> post_data = parsePost(request);
+        for (auto &param : post_data) {
+            if (param.first == "type") bleSpamType = String(param.second).toInt();
+        }
+        isBLESpamming = true;
         
+        // CRITICAL: Do NOT call wifi_off() before BLE!
+        // BLE.init() has a blocking while-loop: while(!wifi_is_up()) { hang; }
+        // Calling wifi_off() first causes INFINITE HANG in BLE.init().
+        // RTL8720DN supports WiFi+BLE coexistence via bt_coex_init() in beginPeripheral().
+        // We only stop the web server so the loop() can enter the BLE block.
         server.stop();
-        wifi_off();
-        delay(100);
-        wifi_on(RTW_MODE_STA);
-        delay(100);
+        delay(50);
         
-        Spammer.start();
+        client.write(makeRedirect("/").c_str());
+        client.stop();
+        client_stopped = true;
+      } else if (path == "/refresh") {
+        client.write(makeRedirect("/").c_str());
+      } else {
+        handle404(client);
       }
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/blescan") {
-      BLE.end();
-      BLE.init();
-      BLE.beginCentral(1);
-      BLE.setScanCallback(bleScanCallback);
-      ble_results.clear();
-      BLEScan* pScan = BLE.configScan();
-      if (pScan != nullptr) {
-        pScan->startScan(3000);
-        delay(3500);
-        pScan->stopScan();
-      }
-      BLE.setScanCallback(nullptr);
-      BLE.end();
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/blewrite") {
-      std::vector<std::pair<String, String>> post_data = parsePost(request);
-      String mac, service_uuid, char_uuid, hex_data;
-      for (auto &param : post_data) {
-          if (param.first == "mac") mac = param.second;
-          else if (param.first == "service") service_uuid = param.second;
-          else if (param.first == "char") char_uuid = param.second;
-          else if (param.first == "data") hex_data = param.second;
-      }
-      
-      if (mac.length() > 0 && hex_data.length() > 0) {
-          BLE.end();
-          BLE.init();
-          BLE.beginCentral(1);
-          // AmebaD kết nối qua configConnection
-          BLEConnect* pConn = BLE.configConnection();
-          if (pConn != nullptr && pConn->connect((char*)mac.c_str(), GAP_REMOTE_ADDR_LE_PUBLIC, 2000)) {
-              BLEClient* pClient = BLE.addClient(0);
-              if (pClient != nullptr) {
-                  pClient->discoverServices();
-                  unsigned long start = millis();
-                  while(!pClient->discoveryDone() && millis() - start < 5000) delay(100);
-                  
-                  BLERemoteService* pService = pClient->getService(service_uuid.c_str());
-                  if (pService != nullptr) {
-                      BLERemoteCharacteristic* pChar = pService->getCharacteristic(char_uuid.c_str());
-                      if (pChar != nullptr) {
-                          uint8_t val[MAX_BLE_WRITE_BYTES];
-                          size_t decoded_len = 0;
-                          if (decodeHexPayload(hex_data, val, sizeof(val), &decoded_len) && decoded_len > 0) {
-                              pChar->setData(val, (uint16_t)decoded_len);
-                          }
-                      }
-                  }
-              }
-              pConn->disconnect(0);
-          }
-          BLE.end();
-      }
-      client.write(makeRedirect("/").c_str());
-    } else if (path == "/blespam") {
-      std::vector<std::pair<String, String>> post_data = parsePost(request);
-      for (auto &param : post_data) {
-          if (param.first == "type") bleSpamType = String(param.second).toInt();
-      }
-      isBLESpamming = true;
-      
-      // CRITICAL: Do NOT call wifi_off() before BLE!
-      // BLE.init() has a blocking while-loop: while(!wifi_is_up()) { hang; }
-      // Calling wifi_off() first causes INFINITE HANG in BLE.init().
-      // RTL8720DN supports WiFi+BLE coexistence via bt_coex_init() in beginPeripheral().
-      // We only stop the web server so the loop() can enter the BLE block.
-      server.stop();
-      delay(50);
-      
-      client.write(makeRedirect("/").c_str());
-      client.stop();
-      goto end_request;
-    } else if (path == "/refresh") {
-      client.write(makeRedirect("/").c_str());
-    } else {
-      handle404(client);
-    }
 
-    client.stop();
+      if (!client_stopped) {
+        client.stop();
+      }
+    }
     if (led) {
       digitalWrite(LED_G, LOW);
     }
-end_request:;
   }
 
   static int last_idle_channel = -1;
