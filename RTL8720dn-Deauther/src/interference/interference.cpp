@@ -449,6 +449,20 @@ uint32_t run_interference_cycle() {
         }
     }
 
+    uint32_t now = millis();
+    if ((uint32_t)(now - last_hb_ms) > 50) {
+        ledToggleBlue();
+        last_hb_ms = now;
+    }
+
+    t->cycle_count++;
+    if ((t->cycle_count % (TARGET_RATIO + 1)) != 0) {
+        return _attack_target(t);
+    }
+    return _scatter_adjacent(t);
+}
+
+interference_state_t get_interference_state() {
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
