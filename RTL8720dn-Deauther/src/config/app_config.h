@@ -41,4 +41,18 @@
 #define SAME_BAND_DELAY_MS        2
 #define IDLE_LOOP_DELAY_MS        2
 
+// HTTP Streaming buffer size (fits comfortably within LwIP 1460-byte TCP MSS)
+#define WEB_STREAM_CHUNK_SIZE     1024
+
+// Host-side unit test fallback pin definitions
+#ifndef LED_R
+#define LED_R 12
+#endif
+#ifndef LED_G
+#define LED_G 10
+#endif
+#ifndef LED_B
+#define LED_B 11
+#endif
+
 #endif // APP_CONFIG_H
