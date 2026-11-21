@@ -3,15 +3,13 @@
 
 #include <Arduino.h>
 #include <ctype.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
-#define MAX_SCAN_RESULTS    64
-#define MAX_BLE_RESULTS     20
-#define MAX_BLE_WRITE_BYTES 512
-#define MAX_HTTP_REQ_SIZE   4096
-#define MAX_SSID_BYTES      32
+#include "../config/app_config.h"
 
 // Escape HTML/JS special characters to prevent Stored/Reflected XSS in Web UI.
 static inline String htmlEscape(const String& input) {
