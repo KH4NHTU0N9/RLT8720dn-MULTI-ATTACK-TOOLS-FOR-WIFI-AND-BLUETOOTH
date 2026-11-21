@@ -53,6 +53,23 @@ size_t interference_sanitize_beacon_tags(const uint8_t* tags, size_t raw_len, si
     if (!tags || raw_len < 2) return 0;
     if (max_len > raw_len) max_len = raw_len;
 
+    size_t pos = 0;
+    while (pos + 2 <= max_len) {
+        uint8_t ie_len = tags[pos + 1];
+        size_t total_ie = 2U + (size_t)ie_len;
+        if (pos + total_ie > max_len) {
+            break;
+        }
+        pos += total_ie;
+    }
+    return pos;
+}
+
+static void _build_synthetic_payload(BeaconClone* t) {
+    if (!t) return;
+    uint8_t ch = (uint8_t)t->target_channel;
+    bool is5GHz = (t->target_channel > 14);
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
