@@ -125,3 +125,17 @@ BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
             delay(50);
         }
 
+        if (conn_id >= 0 && BLE.connected((uint8_t)conn_id)) {
+            BLE.configClient();
+            BLEClient* pClient = BLE.addClient((uint8_t)conn_id);
+            if (pClient == nullptr) {
+                status = BleWriteStatus::BLE_WRITE_CLIENT_FAILED;
+            } else {
+                pClient->discoverServices();
+                const unsigned long disc_start = millis();
+                while (!pClient->discoveryDone() &&
+                       pClient->connected() &&
+                       (unsigned long)(millis() - disc_start) < BLE_DISCOVERY_TIMEOUT_MS) {
+                    delay(50);
+                }
+
