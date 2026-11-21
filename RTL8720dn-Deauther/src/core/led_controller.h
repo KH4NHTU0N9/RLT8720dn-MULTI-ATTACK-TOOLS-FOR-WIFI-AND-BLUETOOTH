@@ -12,4 +12,17 @@ void ledSetEnabled(bool enabled);
 bool ledIsEnabled();
 
 // Set explicit RGB channels (respects ledIsEnabled()).
+void ledSetColor(bool r, bool g, bool b);
+void ledSetRed(bool on);
+void ledSetGreen(bool on);
+void ledSetBlue(bool on);
+void ledToggleGreen();
+void ledToggleBlue();
+void ledOff();
+
+// Semantic state presets
+void ledShowIdle();
+void ledShowHttpBusy();
+void ledShowAttackOff();
+
 #endif // LED_CONTROLLER_H
