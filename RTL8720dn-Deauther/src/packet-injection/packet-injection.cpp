@@ -75,3 +75,20 @@ bool wifi_tx_deauth_nav(void* src_mac, void* dst_mac, uint16_t reason, void* bss
   frame.reason = reason;
   return wifi_tx_raw_frame(&frame, sizeof(DeauthFrame));
 }
+
+bool wifi_tx_disassoc_frame(void* src_mac, void* dst_mac, uint16_t reason, void* bssid) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  DisassocFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, bssid);
+  frame.reason = reason;
+  return wifi_tx_raw_frame(&frame, sizeof(DisassocFrame));
+}
+
+bool wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid) {
+  if (src_mac == nullptr || dst_mac == nullptr || ssid == nullptr) return false;
+
+  uint8_t frame[128];
+  memset(frame, 0, 36);
+  frame[0] = 0x80;
+  _fill_mac_addrs(&frame[4], &frame[10], &frame[16], src_mac, dst_mac, src_mac);
+
