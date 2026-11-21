@@ -113,4 +113,12 @@ public:
         return true;
     }
 
+private:
+    IWebOutput& _output;
+    uint8_t _buf[WEB_STREAM_CHUNK_SIZE];
+    size_t _len;
+    bool _aborted;
+    size_t _total_bytes;
+};
+
 #endif // WEB_STREAM_H
