@@ -15,3 +15,18 @@
 #include "src/ble/ble_manager.h"
 #include "src/web/web_router.h"
 
+AppState g_app;
+WiFiServer server(80);
+
+void setup() {
+  ledInit();
+  DEBUG_SER_INIT();
+  DEBUG_SER_PRINT("\n[*] Booting RTL8720dn-Deauther...\n");
+
+  oled_init();
+  oled_show_boot();
+  delay(BOOT_SPLASH_MS);
+
+  wifiScannerInit();
+  bleManagerInit();
+
