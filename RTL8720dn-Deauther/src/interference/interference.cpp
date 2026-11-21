@@ -407,6 +407,31 @@ static uint32_t _scatter_adjacent(BeaconClone* t) {
     }
     return sent;
 }
+
+uint32_t run_interference_cycle() {
+    if (num_targets == 0) return 0;
+
+    if (rx_captured_ready) {
+        _finalize_captured_beacon();
+    }
+
+    for (int i = 0; i < num_targets; i++) {
+        if (targets[i].state == INT_STATE_CAPTURING) {
+            uint32_t elapsed = (uint32_t)(millis() - targets[i].start_time);
+            if (elapsed > CAPTURE_TIMEOUT_MS) {
+                _activate_synthetic(&targets[i]);
+            } else {
+                uint32_t now = millis();
+                if ((uint32_t)(now - last_blink_ms) > 150) {
+                    ledToggleGreen();
+                    last_blink_ms = now;
+                }
+                delay(5);
+                return 0;
+            }
+        }
+    }
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
