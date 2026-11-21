@@ -110,3 +110,25 @@ static const uint8_t* findTaggedIe(const uint8_t* ie_start, size_t ie_len, uint8
 static void test_packet_injection_frames_and_guards() {
     resetHarness();
 
+    // Verify packed IEEE 802.11 management/control frame sizes
+    ASSERT_EQ_INT(sizeof(DeauthFrame), 26);
+    ASSERT_EQ_INT(sizeof(DisassocFrame), 26);
+    ASSERT_EQ_INT(sizeof(AuthFrame), 30);
+    ASSERT_EQ_INT(sizeof(AssocFrame), 28);
+    ASSERT_EQ_INT(sizeof(NullFrame), 24); // Fixed: non-QoS 0x48 must not carry QoS Control
+    ASSERT_EQ_INT(sizeof(ProbeRequest), 24);
+    ASSERT_EQ_INT(sizeof(CSAFrame), 31); // Fixed: packed Switch Count byte included
+
+    // Raw frame boundary and radio state guards
+    uint8_t dummy[32] = {0};
+    ASSERT_FALSE(wifi_tx_raw_frame(nullptr, 24));
+    ASSERT_FALSE(wifi_tx_raw_frame(dummy, 23));
+    ASSERT_FALSE(wifi_tx_raw_frame(dummy, 1537));
+    g_wlan_running_flag = 0;
+    ASSERT_FALSE(wifi_tx_raw_frame(dummy, 24));
+    g_wlan_running_flag = 1;
+    rltk_wlan_info = nullptr;
+    ASSERT_FALSE(wifi_tx_raw_frame(dummy, 24));
+    rltk_wlan_info = g_fake_wlan_storage;
+    ASSERT_TRUE(wifi_tx_raw_frame(dummy, 24));
+
