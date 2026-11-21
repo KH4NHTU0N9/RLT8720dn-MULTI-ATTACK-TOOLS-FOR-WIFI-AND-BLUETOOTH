@@ -432,6 +432,23 @@ uint32_t run_interference_cycle() {
         }
     }
 
+    int start = active_target;
+    do {
+        active_target = (active_target + 1) % num_targets;
+        if (targets[active_target].state == INT_STATE_ACTIVE) break;
+    } while (active_target != start);
+
+    BeaconClone* t = &targets[active_target];
+    if (t->state != INT_STATE_ACTIVE) return 0;
+
+    if (!t->payload || t->payload_len == 0) {
+        _build_synthetic_payload(t);
+        if (!t->payload) {
+            t->state = INT_STATE_IDLE;
+            return 0;
+        }
+    }
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
