@@ -30,3 +30,20 @@ void setup() {
   wifiScannerInit();
   bleManagerInit();
 
+  wifiRestoreSoftAp(g_app.config.current_channel);
+
+  oled_show_scanning();
+  wifiScanNetworks();
+
+#ifdef DEBUG
+  for (size_t i = 0; i < g_scan_results.size(); i++) {
+    DEBUG_SER_PRINT(g_scan_results[i].ssid);
+    DEBUG_SER_PRINT(" ");
+    debugPrintMac(g_scan_results[i].bssid);
+    DEBUG_SER_PRINT(" CH:");
+    DEBUG_SER_PRINT((int)g_scan_results[i].channel);
+    DEBUG_SER_PRINT(" RSSI:");
+    DEBUG_SER_PRINTLN((int)g_scan_results[i].rssi);
+  }
+#endif
+
