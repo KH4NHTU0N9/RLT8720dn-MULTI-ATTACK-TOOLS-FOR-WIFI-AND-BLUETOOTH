@@ -193,3 +193,21 @@ static void _renderWifiPanel(WebStream& out, const AppState& app,
                  "<button class='btn pri' type='submit' formaction='/interfere'>Start Interference (Max 4)</button>"
                  "</div></div></form></div>");
 }
+
+static void _renderSpamPanel(WebStream& out, const AppState& app) {
+    out.writeStr("<div id='p_spam' class='panel'><div class='card'>"
+                 "<div class='chd'><span>Beacon Flooding (SSID Spammer)</span></div>"
+                 "<div class='acts' style='margin:0 0 10px'>"
+                 "<button class='btn sm' type='button' onclick=\"fillSpam('Free_Airport_WiFi\\nGuest_5G\\nCoffee_Free\\nPublic_Hotspot')\">Preset Demo</button>"
+                 "<button class='btn sm' type='button' onclick=\"fillSpam('')\">Clear</button></div>"
+                 "<form method='post' action='/spam'>"
+                 "<div class='fld'><label>SSID List (one per line, max 64)</label>"
+                 "<textarea id='s_list' name='ssids' placeholder='Free WiFi&#10;Test_AP'></textarea></div>"
+                 "<div class='row' style='margin-top:8px'>"
+                 "<div class='fld'><label>Beacons / SSID (1-20)</label><input type='number' name='count' min='1' max='20' value='");
+    out.writeInt((long)app.config.beacons_per_ssid);
+    out.writeStr("'></div><div class='fld'><label>Or Random SSIDs (0 = use list)</label>"
+                 "<input type='number' name='random_count' min='0' max='64' value='0'></div></div>"
+                 "<div class='acts'><button class='btn red' type='submit'>Start Beacon Flood</button></div>"
+                 "</form></div></div>");
+}
