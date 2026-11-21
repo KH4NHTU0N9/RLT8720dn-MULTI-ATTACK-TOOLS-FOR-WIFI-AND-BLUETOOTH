@@ -52,3 +52,22 @@ static void _bleScanCallback(T_LE_CB_DATA* p_data) {
         return;
     }
 
+    T_LE_SCAN_INFO* info = p_data->p_le_scan_info;
+    char mac_str[18];
+    snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+             info->bd_addr[5], info->bd_addr[4], info->bd_addr[3],
+             info->bd_addr[2], info->bd_addr[1], info->bd_addr[0]);
+
+    for (size_t i = 0; i < g_ble_results.size(); i++) {
+        if (strcmp(g_ble_results[i].address, mac_str) == 0) {
+            return;
+        }
+    }
+
+    BLEAuditResult res;
+    memcpy(res.address, mac_str, sizeof(res.address));
+    res.addr_type = (uint8_t)info->remote_addr_type;
+    res.rssi = (int16_t)info->rssi;
+    res.name = parseBleDeviceName(info->data, info->data_len);
+    g_ble_results.push_back(res);
+}
