@@ -90,3 +90,18 @@ public:
         return len;
     }
 
+    bool contains(const char* sub) const {
+        return sub && body.find(sub) != std::string::npos;
+    }
+};
+
+struct CallbackRecorder {
+    int scan_calls = 0;
+    int prepare_attack_calls = 0;
+};
+
+static bool testPostScanCb(void* ctx) {
+    CallbackRecorder* rec = static_cast<CallbackRecorder*>(ctx);
+    rec->scan_calls++;
+    return true;
+}
