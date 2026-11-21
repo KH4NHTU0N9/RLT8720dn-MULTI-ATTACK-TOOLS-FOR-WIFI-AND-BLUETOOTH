@@ -102,6 +102,10 @@ static void _i2c_begin() {
     _i2c_start();
     _i2c_write((uint8_t)(OLED_I2C_ADDR << 1));
 }
+
+// ===================================================================
+// SSD1306 LOW-LEVEL
+// ===================================================================
 static void _ssd1306_init_hw() {
     static const uint8_t init[] = {
         0xAE,        // Display OFF
