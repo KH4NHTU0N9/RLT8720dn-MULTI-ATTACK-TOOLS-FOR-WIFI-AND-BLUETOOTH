@@ -160,4 +160,19 @@ static inline void delayMicroseconds(unsigned int us) {
     mockArduino().clock_us += us;
 }
 
+static inline void pinMode(uint8_t pin, uint8_t mode) {
+    MockArduinoState& st = mockArduino();
+    st.pin_mode_calls++;
+    if (pin < 64) {
+        st.pin_initialized[pin] = true;
+        st.pin_mode[pin] = mode;
+        if (mode == INPUT_PULLUP) {
+            st.pin_level[pin] = HIGH;
+        }
+        if (st.on_gpio_event) {
+            st.on_gpio_event(pin, st.pin_mode[pin], st.pin_level[pin], st.on_gpio_ctx);
+        }
+    }
+}
+
 #endif // MOCK_ARDUINO_H
