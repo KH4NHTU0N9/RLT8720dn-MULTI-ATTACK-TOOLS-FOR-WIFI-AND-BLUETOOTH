@@ -42,4 +42,17 @@ public:
     int end_calls = 0;
     int init_calls = 0;
 
+    void reset() {
+        scan = BLEScan{};
+        conn = BLEConnect{};
+        client = BLEClient{};
+        advert = BLEAdvert{};
+        client_configured = false;
+        add_client_without_config = false;
+        conn_is_connected = true;
+        return_null_client = false;
+        end_calls = 0;
+        init_calls = 0;
+    }
+
 #endif // MOCK_BLE_DEVICE_H
