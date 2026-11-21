@@ -339,3 +339,20 @@ void webRenderDashboard(IWebOutput& output,
                  "<button class='tab' data-t='p_cfg' type='button' onclick=\"tab('p_cfg')\">Settings</button>"
                  "</div>");
 
+    _renderWifiPanel(out, app, scan_results);
+    _renderSpamPanel(out, app);
+    _renderBlePanel(out, app, ble_results);
+    _renderSettingsPanel(out, app, scan_results.size(), ble_results.size(), led_enabled, free_heap_bytes);
+
+    out.writeStr("</div>");
+    out.writeStr(kScript);
+    out.flush();
+}
+
+void webRenderPlainError(IWebOutput& output, int code, const char* body) {
+    WebStream out(output);
+    const String hdr = buildHttpResponseHeaders(code, "text/plain");
+    out.writeBytes(hdr.c_str(), hdr.length());
+    if (body) out.writeStr(body);
+    out.flush();
+}
