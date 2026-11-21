@@ -76,4 +76,26 @@ static inline int wifi_disable_powersave() {
     return 0;
 }
 
+static inline int wifi_on(int mode) {
+    mockWifi().current_mode = mode;
+    mockWifi().powersave_disabled = false;
+    return 0;
+}
+
+static inline int wifi_off() {
+    mockWifi().current_mode = RTW_MODE_NONE;
+    return 0;
+}
+
+static inline rtw_result_t wifi_scan_networks(scan_result_handler_t results_handler, void* user_data) {
+    (void)user_data;
+    MockWifiState& w = mockWifi();
+    if (w.wifi_scan_should_fail || !results_handler) {
+        return RTW_ERROR;
+    }
+    w.active_scan_handler = results_handler;
+    for (size_t i = 0; i < w.canned_scan_results.size(); i++) {
+        rtw_scan_handler_result_t item{};
+        item.scan_complete = 0;
+        item.ap_details = w.canned_scan_results[i];
 #endif // MOCK_WIFI_CONF_H
