@@ -201,3 +201,20 @@ static void test_dirty_page_diffing_and_screens() {
     mockArduino().on_gpio_event = Ssd1306WireListener::gpioHook;
     mockArduino().on_gpio_ctx = &listener;
 
+    ASSERT_TRUE(oled_init());
+    listener.resetCounters();
+
+    // Draw Idle screen: header is y=0..11, gap row y=12..13 must be dark, separator line y=14 full width
+    oled_show_idle(4, 2);
+    ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
+    ASSERT_EQ_INT(listener.wrong_addr_count, 0);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 12, 127, 13), 0);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 14, 127, 14), 128);
+    ASSERT_TRUE(listener.data_pages_written > 0);
+
+    // Re-drawing identical Idle screen must skip ALL 8 pages via dirty-page diffing!
+    listener.resetCounters();
+    oled_show_idle(4, 2);
+    ASSERT_EQ_INT(listener.data_pages_written, 0);
+    ASSERT_EQ_INT(listener.data_bytes_written, 0);
+
