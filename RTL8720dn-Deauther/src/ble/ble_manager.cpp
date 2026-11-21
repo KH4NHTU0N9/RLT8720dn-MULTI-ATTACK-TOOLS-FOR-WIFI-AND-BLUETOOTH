@@ -38,3 +38,17 @@ static const uint8_t kAppleModels[][2] = {
     {0x06, 0x20}, // HomePod Setup
     {0x09, 0x20}, // AppleTV Connect
 };
+
+static const uint32_t kGoogleModels[] = {
+    0x0002F0, 0x000006, 0x00000A, 0x000055, 0x000070,
+    0x000007, 0x000012, 0x0000F0, 0x000001, 0x000003
+};
+
+static void _bleScanCallback(T_LE_CB_DATA* p_data) {
+    if (!g_ble_scan_accepting || p_data == nullptr || p_data->p_le_scan_info == nullptr) {
+        return;
+    }
+    if (g_ble_results.size() >= MAX_BLE_RESULTS) {
+        return;
+    }
+
