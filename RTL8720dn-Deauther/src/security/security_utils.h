@@ -221,4 +221,28 @@ static inline int clampRssiPercent(int rssi) {
     if (width > 100) return 100;
     return width;
 }
+
+// Build RFC 9112 compliant HTTP response headers with CRLF line endings.
+static inline String buildHttpResponseHeaders(int code, const String& content_type) {
+    const char* reason = "OK";
+    switch (code) {
+        case 200: reason = "OK"; break;
+        case 204: reason = "No Content"; break;
+        case 400: reason = "Bad Request"; break;
+        case 404: reason = "Not Found"; break;
+        case 405: reason = "Method Not Allowed"; break;
+        case 413: reason = "Payload Too Large"; break;
+        case 500: reason = "Internal Server Error"; break;
+        default:  reason = "OK"; break;
+    }
+    String response;
+    response.reserve(192);
+    response += "HTTP/1.1 ";
+    response += String(code);
+    response += " ";
+    response += reason;
+    response += "\r\nContent-Type: ";
+    response += content_type;
+    response += "\r\nCache-Control: no-store\r\n";
+    response += "X-Content-Type-Options: nosniff\r\n";
 #endif // SECURITY_UTILS_H
