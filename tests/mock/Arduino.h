@@ -189,4 +189,16 @@ static inline void digitalWrite(uint8_t pin, uint8_t val) {
     }
 }
 
+static inline long random(long howbig) {
+    if (howbig <= 0) return 0;
+    MockArduinoState& st = mockArduino();
+    st.prng_state = st.prng_state * 1664525u + 1013904223u;
+    return static_cast<long>(st.prng_state % static_cast<uint32_t>(howbig));
+}
+
+static inline long random(long howsmall, long howbig) {
+    if (howsmall >= howbig) return howsmall;
+    return howsmall + random(howbig - howsmall);
+}
+
 #endif // MOCK_ARDUINO_H
