@@ -65,3 +65,22 @@ struct __attribute__((packed)) AssocFrame {
   uint16_t cap_info = 0x0411;
   uint16_t listen_interval = 0x0001;
 };
+
+// Non-QoS Null Data frame (24 bytes; no QoS Control field on subtype 4 = 0x48)
+struct __attribute__((packed)) NullFrame {
+  uint16_t frame_control = 0x48;
+  uint16_t duration = 0;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+};
+
+struct __attribute__((packed)) ProbeRequest {
+  uint16_t frame_control = 0x40;
+  uint16_t duration = 0;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+};
