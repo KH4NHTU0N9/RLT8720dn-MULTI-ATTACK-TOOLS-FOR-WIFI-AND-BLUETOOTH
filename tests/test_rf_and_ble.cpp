@@ -363,3 +363,24 @@ static void test_ble_manager_payloads_scan_and_gatt_write() {
     ASSERT_EQ_INT(buf[13], 0xFE);
     ASSERT_EQ_INT(buf[14], 0xFF);
 
+    ASSERT_EQ_INT(bleBuildGoogleSpamPayload(buf, sizeof(buf), 0), BLE_GOOGLE_PAYLOAD_LEN);
+    const uint8_t r4[4] = {0x11, 0x22, 0x33, 0x44};
+    ASSERT_EQ_INT(bleBuildWindowsSpamPayload(buf, sizeof(buf), r4), BLE_WINDOWS_PAYLOAD_LEN);
+    ASSERT_EQ_INT(bleBuildAppleSpamPayload(nullptr, sizeof(buf), 0, 0, 0), 0);
+    ASSERT_EQ_INT(bleBuildAppleSpamPayload(buf, 10, 0, 0, 0), 0);
+
+    // BLE Scan: single blocking duration (no double-delay), reverses bd_addr, caps at MAX_BLE_RESULTS
+    bleManagerInit();
+    for (int i = 0; i < 25; i++) {
+        T_LE_SCAN_INFO info{};
+        std::memset(&info, 0, sizeof(info));
+        info.bd_addr[5] = 0xAA;
+        info.bd_addr[0] = static_cast<uint8_t>(i);
+        info.remote_addr_type = (i % 2);
+        info.rssi = -65;
+        const uint8_t adv[] = {0x05, 0x09, 'D', 'e', 'v', static_cast<uint8_t>('0' + (i % 10))};
+        std::memcpy(info.data, adv, sizeof(adv));
+        info.data_len = sizeof(adv);
+        mockBleInstance().scan.canned_devices.push_back(info);
+    }
+
