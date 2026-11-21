@@ -187,4 +187,21 @@ static inline bool parseStrictInt(const String& src, long* out_val) {
     while (*s && isspace((unsigned char)*s)) s++;
     if (*s == '\0') return false;
 
+    char* endptr = nullptr;
+    long val = strtol(s, &endptr, 10);
+    if (endptr == s) return false;
+    while (*endptr && isspace((unsigned char)*endptr)) endptr++;
+    if (*endptr != '\0') return false;
+
+    *out_val = val;
+    return true;
+}
+
+static inline bool parseStrictIntRange(const String& src, long min_val, long max_val, long* out_val) {
+    long tmp = 0;
+    if (!parseStrictInt(src, &tmp)) return false;
+    if (tmp < min_val || tmp > max_val) return false;
+    *out_val = tmp;
+    return true;
+}
 #endif // SECURITY_UTILS_H
