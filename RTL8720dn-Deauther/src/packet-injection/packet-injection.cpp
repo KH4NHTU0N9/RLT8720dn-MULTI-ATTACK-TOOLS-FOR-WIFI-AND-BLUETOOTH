@@ -170,3 +170,21 @@ bool wifi_tx_raw_beacon(void* src_mac, void* dst_mac, uint8_t* payload, size_t p
   memcpy(&frame[34], &caps, 2);
   memcpy(&frame[36], payload, payload_len);
 
+  return wifi_tx_raw_frame(frame, 36 + payload_len);
+}
+
+bool wifi_tx_beacon_csa_frame(void* src_mac, void* dst_mac, const char *ssid, uint8_t target_channel) {
+  if (src_mac == nullptr || dst_mac == nullptr || ssid == nullptr) return false;
+
+  uint8_t frame[128];
+  memset(frame, 0, 36);
+  frame[0] = 0x80;
+  _fill_mac_addrs(&frame[4], &frame[10], &frame[16], src_mac, dst_mac, src_mac);
+
+  uint64_t tsf = (uint64_t)micros();
+  memcpy(&frame[24], &tsf, 8);
+  uint16_t interval = 0x0064;
+  uint16_t caps = 0x0411;
+  memcpy(&frame[32], &interval, 2);
+  memcpy(&frame[34], &caps, 2);
+
