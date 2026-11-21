@@ -353,3 +353,18 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (strcmp(path, "/") == 0 || strcmp(path, "/refresh") == 0) {
+        if (!_isGetOrHeadMethod(method) && strcmp(path, "/refresh") != 0) {
+            webRenderPlainError(output, 405, "Method Not Allowed");
+            return false;
+        }
+        size_t heap_bytes = 0;
+#ifndef UNIT_TEST
+        heap_bytes = xPortGetFreeHeapSize();
+#else
+        heap_bytes = 250 * 1024;
+#endif
+        webRenderDashboard(output, g_app, g_scan_results, g_ble_results, ledIsEnabled(), heap_bytes);
+        return false;
+    }
+
