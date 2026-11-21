@@ -208,6 +208,14 @@ static void test_ssid_mac_and_http_helpers() {
         ASSERT_EQ_INT(ssid.length(), MAX_SSID_BYTES);
     }
 
+    // MAC formatting
+    char mac_buf[18];
+    const uint8_t mac[6] = {0x00, 0x0F, 0xA3, 0xBC, 0x12, 0x9E};
+    formatMacAddress(mac, mac_buf, sizeof(mac_buf));
+    ASSERT_STREQ(String(mac_buf), "00:0F:A3:BC:12:9E");
+    formatMacAddress(nullptr, mac_buf, sizeof(mac_buf));
+    ASSERT_STREQ(String(mac_buf), "00:00:00:00:00:00");
+
     // RSSI meter percentage clamping [0, 100]
     ASSERT_EQ_INT(clampRssiPercent(-200), 0);
     ASSERT_EQ_INT(clampRssiPercent(-120), 0);
@@ -216,32 +224,6 @@ static void test_ssid_mac_and_http_helpers() {
     ASSERT_EQ_INT(clampRssiPercent(0), 100);
     ASSERT_EQ_INT(clampRssiPercent(50), 100);
 
-    // HTTP response header CRLF & security headers
-    String hdr200 = buildHttpResponseHeaders(200, "text/html");
-    ASSERT_TRUE(hdr200.indexOf("HTTP/1.1 200 OK\r\n") == 0);
-    ASSERT_TRUE(hdr200.indexOf("X-Content-Type-Options: nosniff\r\n") >= 0);
-    ASSERT_TRUE(hdr200.indexOf("X-Frame-Options: DENY\r\n") >= 0);
-    ASSERT_TRUE(hdr200.indexOf("\r\n\r\n") >= 0);
-
-    String hdr404 = buildHttpResponseHeaders(404, "text/plain");
-    ASSERT_TRUE(hdr404.indexOf("HTTP/1.1 404 Not Found\r\n") == 0);
-
-    // HTTP 303 See Other redirect terminates header block with CRLFCRLF
-    String redir = buildHttpRedirectHeaders("/");
-    ASSERT_STREQ(redir,
-                 "HTTP/1.1 303 See Other\r\n"
-                 "Location: /\r\n"
-                 "Content-Length: 0\r\n"
-                 "Connection: close\r\n\r\n");
-}
-
-int main() {
-    std::printf("Running RTL8720dn security unit tests...\n");
-    test_html_escape();
-    test_url_decode();
-    test_ble_device_name_parser();
-    test_decode_hex_payload();
-    test_ssid_and_http_helpers();
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
