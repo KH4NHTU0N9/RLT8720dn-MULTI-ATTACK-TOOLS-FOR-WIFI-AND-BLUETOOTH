@@ -402,3 +402,18 @@ static void test_ble_manager_payloads_scan_and_gatt_write() {
     mockBleInstance().client.service = &rsvc;
     mockBleInstance().conn.conn_id_after_polls = 2;
 
+    const uint8_t payload[3] = {0xDE, 0xAD, 0x01};
+    BleWriteStatus st = bleWriteCharacteristic(
+        "AA:00:00:00:00:01", GAP_REMOTE_ADDR_LE_RANDOM, "FFE0", "FFE1", payload, sizeof(payload));
+    ASSERT_TRUE(st == BleWriteStatus::BLE_WRITE_OK);
+    ASSERT_FALSE(mockBleInstance().add_client_without_config);
+    ASSERT_TRUE(mockBleInstance().conn.last_addr_type == GAP_REMOTE_ADDR_LE_RANDOM);
+    ASSERT_EQ_INT(mockBleInstance().conn.disconnect_calls, 1);
+    ASSERT_EQ_INT(rchar.written_bytes.size(), 3);
+    ASSERT_EQ_INT(rchar.written_bytes[1], 0xAD);
+
+    // Failure diagnostics: missing char vs discovery timeout
+    st = bleWriteCharacteristic(
+        "AA:00:00:00:00:01", GAP_REMOTE_ADDR_LE_PUBLIC, "FFE0", "BAD0", payload, sizeof(payload));
+    ASSERT_TRUE(st == BleWriteStatus::BLE_WRITE_CHAR_NOT_FOUND);
+
