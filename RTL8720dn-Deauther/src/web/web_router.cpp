@@ -205,3 +205,27 @@ static void _handleSpamPost(const std::vector<std::pair<String, String>>& params
     std::vector<String> ssids;
     int random_count = 0;
 
+    for (size_t i = 0; i < params.size(); i++) {
+        const String& k = params[i].first;
+        const String& v = params[i].second;
+        if (k == "count") {
+            g_app.config.beacons_per_ssid = webClampBeaconsPerSsid(v, g_app.config.beacons_per_ssid);
+        } else if (k == "random_count") {
+            random_count = webClampRandomSsidCount(v);
+        } else if (k == "ssids") {
+            const char* p = v.c_str();
+            size_t len = v.length();
+            size_t start = 0;
+            while (start <= len && ssids.size() < MAX_SPAM_NETWORKS) {
+                size_t end = start;
+                while (end < len && p[end] != '\n') end++;
+                String line;
+                line.reserve((unsigned int)(end - start));
+                for (size_t j = start; j < end; j++) {
+                    if (p[j] != '\r') line += p[j];
+                }
+                line.trim();
+                if (line.length() > 0) {
+                    ssids.push_back(line);
+                }
+                if (end >= len) break;
