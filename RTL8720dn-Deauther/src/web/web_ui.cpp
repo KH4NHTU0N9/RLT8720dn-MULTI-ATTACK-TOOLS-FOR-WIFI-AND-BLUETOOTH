@@ -142,3 +142,18 @@ void webRenderScanRow(WebStream& out, const WiFiScanResult& ap, size_t idx, cons
     out.writeStr("' style='width:");
     out.writeInt((long)width);
     out.writeStr("%'>");
+    out.writeInt((long)ap.rssi);
+    out.writeStr(" dBm</div></div></td><td style='text-align:center'><input class='ck ");
+    out.writeStr(group_cls ? group_cls : "g2");
+    out.writeStr("' type='checkbox' name='target' value='");
+    out.writeUInt((unsigned long)idx);
+    out.writeStr("'></td></tr>");
+}
+
+static void _renderBandCard(WebStream& out, const char* title, const char* cls,
+                            const std::vector<WiFiScanResult>& scan_results, bool want_5g) {
+    int count = 0;
+    for (size_t i = 0; i < scan_results.size(); i++) {
+        if (is5GhzChannel(scan_results[i].channel) == want_5g) count++;
+    }
+
