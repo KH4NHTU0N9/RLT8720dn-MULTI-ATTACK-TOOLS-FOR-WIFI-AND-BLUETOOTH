@@ -299,3 +299,27 @@ static void test_http_router_endpoints() {
         ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_WARN);
     }
 
+    // POST /deauth with valid targets starts DEAUTH and populates g_deauth_channels
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /deauth HTTP/1.1\r\n\r\ntarget=0&target=1&frames=300&reason=7";
+        ASSERT_TRUE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::DEAUTH);
+        ASSERT_EQ_INT(g_app.config.frames_per_deauth, 300);
+        ASSERT_EQ_INT(g_app.config.deauth_reason, 7);
+        ASSERT_EQ_INT(g_deauth_channels[1].size(), 1);
+        ASSERT_EQ_INT(g_deauth_channels[36].size(), 1);
+        ASSERT_EQ_INT(rec.prepare_attack_calls, 1);
+    }
+
+    // POST /interfere switches into INTERFERENCE cleanly
+    resetWebState();
+    for (int i = 0; i < 2; i++) {
+        WiFiScanResult ap{};
+        ap.ssid = "Target";
+        std::memset(ap.bssid, static_cast<uint8_t>(0x20 + i), 6);
+        ap.channel = 6;
+        g_scan_results.push_back(ap);
+    }
+    {
+        MemoryWebOutput out;
