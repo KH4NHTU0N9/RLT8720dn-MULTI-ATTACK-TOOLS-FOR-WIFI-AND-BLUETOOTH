@@ -26,3 +26,22 @@ public:
 private:
     WiFiClient& _c;
 };
+#endif
+
+static void _writeRedirect(IWebOutput& output, const char* url) {
+    String hdr = buildHttpRedirectHeaders(url ? url : "/");
+    output.writeBytes((const uint8_t*)hdr.c_str(), hdr.length());
+}
+
+void webParsePostBody(const char* body, size_t body_len,
+                      std::vector<std::pair<String, String>>& out_params) {
+    out_params.clear();
+    if (!body || body_len == 0) return;
+
+    // Estimate pair count to minimize vector reallocations
+    size_t est = 1;
+    for (size_t i = 0; i < body_len; i++) {
+        if (body[i] == '&') est++;
+    }
+    out_params.reserve(est);
+
