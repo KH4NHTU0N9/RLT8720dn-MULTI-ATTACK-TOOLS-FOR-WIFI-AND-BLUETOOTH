@@ -12,4 +12,12 @@ public:
     bool isRunning() const { return _running; }
     int port() const { return _port; }
 
+    int begin_calls = 0;
+    int stop_calls = 0;
+
+private:
+    int _port;
+    bool _running;
+};
+
 #endif // MOCK_WIFI_SERVER_H
