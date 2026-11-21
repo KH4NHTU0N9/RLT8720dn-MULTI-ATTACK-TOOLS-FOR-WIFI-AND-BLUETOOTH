@@ -282,3 +282,24 @@ static void test_interference_sniffer_deadlock_and_synthetic_fallback() {
     ASSERT_EQ_INT(get_interference_state(), INT_STATE_ACTIVE);
     ASSERT_EQ_INT(mockWifi().promisc_level, RTW_PROMISC_DISABLE);
 
+    // Synthetic timeout fallback on both 2.4 GHz (ch 11) and 5 GHz (ch 149) + multi-target bounds
+    resetHarness();
+    uint8_t mac24[6] = {0xAA, 0x00, 0x00, 0x00, 0x00, 0x24};
+    uint8_t mac5g[6] = {0xBB, 0x00, 0x00, 0x00, 0x00, 0x5A};
+    start_interference_multi();
+    ASSERT_FALSE(add_interference_target(nullptr, 6));
+    ASSERT_FALSE(add_interference_target(mac24, 0));
+    ASSERT_TRUE(add_interference_target(mac24, 11));
+    ASSERT_TRUE(add_interference_target(mac5g, 149));
+    ASSERT_TRUE(add_interference_target(mac24, 1));
+    ASSERT_TRUE(add_interference_target(mac5g, 36));
+    ASSERT_FALSE(add_interference_target(mac24, 6)); // 5th rejected
+
+    // Force capture timeout on target 0 -> falls back cleanly to synthetic tpl_24
+    mockAdvanceMillis(3000);
+    g_tx_frames.clear();
+    uint32_t syn_sent = run_interference_cycle();
+    ASSERT_TRUE(syn_sent > 0);
+    ASSERT_EQ_INT(get_active_target_count(), 4);
+    stop_interference();
+}
