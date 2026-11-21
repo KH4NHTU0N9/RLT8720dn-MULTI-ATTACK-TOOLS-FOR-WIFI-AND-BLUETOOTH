@@ -40,3 +40,21 @@ void ledSetEnabled(bool enabled) {
     }
     applyPins();
 }
+
+bool ledIsEnabled() {
+    return g_led_enabled;
+}
+
+void ledSetColor(bool r, bool g, bool b) {
+    if (!g_led_enabled) return;
+    g_r_state = r;
+    g_g_state = g;
+    g_b_state = b;
+    applyPins();
+}
+
+void ledSetRed(bool on) {
+    if (!g_led_enabled) return;
+    g_r_state = on;
+    applyPins();
+}
