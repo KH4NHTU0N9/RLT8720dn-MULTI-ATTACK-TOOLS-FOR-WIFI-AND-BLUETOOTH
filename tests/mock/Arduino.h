@@ -104,6 +104,17 @@ private:
     std::string _s;
 };
 
-static inline unsigned long millis() { return 0; }
+struct MockArduinoState {
+    unsigned long clock_ms = 0;
+    unsigned long long clock_us = 0;
+    uint32_t prng_state = 0x12345678u;
+
+    bool pin_initialized[64] = {false};
+    uint8_t pin_mode[64] = {0};
+    uint8_t pin_level[64] = {0};
+    uint32_t digital_write_calls = 0;
+    uint32_t pin_mode_calls = 0;
+    uint32_t write_before_pinmode_violations = 0;
+
 
 #endif // MOCK_ARDUINO_H
