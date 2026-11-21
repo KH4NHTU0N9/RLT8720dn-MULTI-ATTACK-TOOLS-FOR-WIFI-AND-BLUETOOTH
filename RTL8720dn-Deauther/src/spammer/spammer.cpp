@@ -92,4 +92,19 @@ uint32_t SSIDSpammer::run() {
     delay(1);
     return sent;
 }
+
+void SSIDSpammer::_generateRandomMAC(uint8_t* mac) {
+    if (!mac) return;
+    for (int i = 0; i < 6; i++) {
+        mac[i] = (uint8_t)random(256);
+    }
+    mac[0] &= 0xFE; // Unicast
+    mac[0] |= 0x02; // Locally Administered Address
+}
+
+String SSIDSpammer::_generateRandomSSID(int length) {
+    static const char kChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    if (length < 1) length = 1;
+    if (length > MAX_SSID_LEN) length = MAX_SSID_LEN;
+
 }
