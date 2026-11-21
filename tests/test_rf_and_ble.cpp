@@ -194,3 +194,21 @@ static void test_spammer_module() {
     Spammer.addSSID("ValidSSID_12345678901234567890_OVERLONG_SUFFIX");
     ASSERT_EQ_INT(Spammer.getNetworkCount(), 1);
 
+    // Enforces MAX_SPAM_NETWORKS (64)
+    for (int i = 0; i < 80; i++) {
+        Spammer.addSSID(String("Net_") + String(i));
+    }
+    ASSERT_EQ_INT(Spammer.getNetworkCount(), MAX_SPAM_NETWORKS);
+
+    // Random mode clamps count [1..64], picks LAA + unicast MACs, and emits valid beacons
+    Spammer.clearSSIDs();
+    Spammer.setRandomMode(true, 100);
+    Spammer.start();
+    ASSERT_TRUE(Spammer.isActive());
+    ASSERT_EQ_INT(Spammer.getNetworkCount(), MAX_SPAM_NETWORKS);
+
+    g_tx_frames.clear();
+    uint32_t sent = Spammer.run();
+    ASSERT_EQ_INT(sent, MAX_SPAM_NETWORKS);
+    ASSERT_EQ_INT(g_tx_frames.size(), MAX_SPAM_NETWORKS);
+
