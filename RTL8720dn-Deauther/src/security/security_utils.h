@@ -65,25 +65,22 @@ static inline String urlDecode(const String& src) {
     return out;
 }
 
-// Safely validate and decode a hex string into a caller-provided fixed buffer.
+// Safely validate and decode a hex string (supports surrounding spaces / optional 0x prefix
+// and spaces between bytes) into a caller-provided fixed buffer.
 static inline bool decodeHexPayload(const String& hex_data, uint8_t* out_buf, size_t max_out_len, size_t* out_len) {
     if (!out_buf || !out_len || max_out_len == 0) return false;
     *out_len = 0;
 
-    unsigned int slen = hex_data.length();
-    if (slen == 0 || (slen % 2) != 0) return false;
+    const char* raw = hex_data.c_str();
+    size_t raw_len = hex_data.length();
+    size_t start = 0;
+    while (start < raw_len && isspace((unsigned char)raw[start])) start++;
+    while (raw_len > start && isspace((unsigned char)raw[raw_len - 1])) raw_len--;
 
-    size_t byte_len = slen / 2;
-    if (byte_len > max_out_len) return false;
-
-    for (size_t i = 0; i < byte_len; i++) {
-        int hi = hexNibble(hex_data[i * 2]);
-        int lo = hexNibble(hex_data[i * 2 + 1]);
-        if (hi < 0 || lo < 0) return false;
-        out_buf[i] = (uint8_t)((hi << 4) | lo);
+    if ((raw_len - start) >= 2 && raw[start] == '0' && (raw[start + 1] == 'x' || raw[start + 1] == 'X')) {
+        start += 2;
     }
 
-    *out_len = byte_len;
     return true;
 }
 
