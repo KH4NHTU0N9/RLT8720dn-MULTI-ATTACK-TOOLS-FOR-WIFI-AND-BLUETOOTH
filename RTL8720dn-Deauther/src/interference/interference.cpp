@@ -34,6 +34,25 @@ static int         adj_hop_idx    = 0;
 static int         csa_idx        = 0;
 static uint32_t    g_mac_counter  = 0xA5000000;
 static uint32_t    last_blink_ms  = 0;
+static uint32_t    last_hb_ms     = 0;
+
+// Lock-free single-producer (RX task) -> single-consumer (main_task) staging buffer
+static volatile bool sniffer_active = false;
+static volatile bool rx_captured_ready = false;
+static int           rx_target_idx = -1;
+static uint16_t      rx_beacon_interval = 0x64;
+static uint16_t      rx_capabilities = 0x0411;
+static size_t        rx_tags_len = 0;
+static uint8_t       rx_tags_buf[MAX_BEACON_TAGS_LEN];
+
+// ===================================================================
+// INTERNAL HELPERS
+// ===================================================================
+
+size_t interference_sanitize_beacon_tags(const uint8_t* tags, size_t raw_len, size_t max_len) {
+    if (!tags || raw_len < 2) return 0;
+    if (max_len > raw_len) max_len = raw_len;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
