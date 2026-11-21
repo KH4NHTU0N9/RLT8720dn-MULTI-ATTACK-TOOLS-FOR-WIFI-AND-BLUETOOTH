@@ -322,3 +322,20 @@ void webRenderDashboard(IWebOutput& output,
     out.writeStr(kCssControls);
     out.writeStr("</style></head><body><div class='wrap'>");
 
+    out.writeStr("<div class='top'><div class='brand'>RTL8720DN Tool <span class='pill'>");
+    out.writeUInt((unsigned long)scan_results.size());
+    out.writeStr(" APs</span></div><div class='row'>"
+                 "<form method='post' action='/rescan'><button class='btn pri sm' type='submit'>Rescan Wi-Fi</button></form>"
+                 "<form method='get' action='/'><button class='btn sm' type='submit'>Refresh</button></form>"
+                 "</div></div>");
+
+    _renderStatusBanner(out, app.notice);
+    out.writeStr("<div class='note'>Starting any radio attack stops this Web UI for max RF performance. Press <b>RST</b> on the board to stop and return.</div>");
+
+    out.writeStr("<div class='tabs'>"
+                 "<button class='tab on' data-t='p_wifi' type='button' onclick=\"tab('p_wifi')\">Wi-Fi</button>"
+                 "<button class='tab' data-t='p_spam' type='button' onclick=\"tab('p_spam')\">Beacon Flood</button>"
+                 "<button class='tab' data-t='p_ble' type='button' onclick=\"tab('p_ble')\">Bluetooth</button>"
+                 "<button class='tab' data-t='p_cfg' type='button' onclick=\"tab('p_cfg')\">Settings</button>"
+                 "</div>");
+
