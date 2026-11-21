@@ -275,6 +275,23 @@ void start_interference(uint8_t* target_bssid, int channel) {
     _start_sniffer_for(0);
     ledSetGreen(true);
 }
+
+void start_interference_multi() {
+    _reset_all_targets();
+    num_targets = 0;
+    active_target = 0;
+    adj_hop_idx = 0;
+    csa_idx = 0;
+    DEBUG_SER_PRINT("[*] INT: Multi-target session initialized.\n");
+}
+
+bool add_interference_target(uint8_t* target_bssid, int channel) {
+    if (!target_bssid || channel <= 0) return false;
+    if (num_targets >= MAX_INTERFERENCE_TARGETS) {
+        DEBUG_SER_PRINT("[!] INT: Target list full\n");
+        return false;
+    }
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
