@@ -292,3 +292,17 @@ static void _renderSettingsPanel(WebStream& out, const AppState& app,
                  "<div class='kv'><span>SoftAP SSID</span><b>" DEFAULT_AP_SSID "</b></div>"
                  "<div class='kv'><span>Web UI</span><b>" DEFAULT_WEBUI_IP "</b></div>"
                  "<div class='kv'><span>Cached Wi-Fi APs</span><b>");
+    out.writeUInt((unsigned long)ap_count);
+    out.writeStr(" / ");
+    out.writeInt(MAX_SCAN_RESULTS);
+    out.writeStr("</b></div><div class='kv'><span>Cached BLE Devices</span><b>");
+    out.writeUInt((unsigned long)ble_count);
+    out.writeStr(" / ");
+    out.writeInt(MAX_BLE_RESULTS);
+    out.writeStr("</b></div><div class='kv'><span>Free Heap</span><b>");
+    out.writeUInt((unsigned long)(free_heap_bytes / 1024U));
+    out.writeStr(" KB (");
+    out.writeUInt((unsigned long)free_heap_bytes);
+    out.writeStr(" B)</b></div></div></div>");
+}
+
