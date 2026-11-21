@@ -120,3 +120,26 @@ static void _runDeauthLoop() {
             oled_show_deauth(total_targets, g_app.sent_frames);
         }
         delay(1);
+    }
+}
+
+static void _runInterferenceLoop(WiFiServer& server) {
+    oled_attack_start();
+    g_app.channel_needs_restore = true;
+
+    while (g_app.attack_mode == AttackMode::INTERFERENCE) {
+        g_app.sent_frames += run_interference_cycle();
+        oled_show_interference(get_active_target_count(), MAX_INTERFERENCE_TARGETS);
+        if (get_interference_state() == INT_STATE_IDLE) {
+            stop_interference();
+            g_app.attack_mode = AttackMode::IDLE;
+            wifiRestoreSoftAp(g_app.config.current_channel);
+            server.begin();
+            int c24 = 0, c5g = 0;
+            wifiScanCountByBand(&c24, &c5g);
+            oled_show_idle(c24, c5g);
+            break;
+        }
+        delay(1);
+    }
+}
