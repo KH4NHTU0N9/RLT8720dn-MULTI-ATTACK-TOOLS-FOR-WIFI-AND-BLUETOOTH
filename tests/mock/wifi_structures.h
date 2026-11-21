@@ -23,4 +23,23 @@ typedef struct {
     uint8_t val[33];
 } rtw_ssid_t;
 
+typedef struct {
+    uint8_t octet[6];
+} rtw_mac_t;
+
+typedef struct {
+    rtw_ssid_t SSID;
+    rtw_mac_t  BSSID;
+    int16_t    signal_strength;
+    uint32_t   channel;
+} rtw_scan_result_t;
+
+typedef struct {
+    int               scan_complete;
+    rtw_scan_result_t ap_details;
+} rtw_scan_handler_result_t;
+
+typedef void (*promisc_callback_t)(unsigned char* buf, unsigned int len, void* userdata);
+typedef rtw_result_t (*scan_result_handler_t)(rtw_scan_handler_result_t* malloced_scan_result);
+
 #endif // MOCK_WIFI_STRUCTURES_H
