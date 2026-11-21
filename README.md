@@ -49,3 +49,16 @@ Biên dịch kiểm tra qua Arduino CLI:
 
 ```sh
 arduino-cli compile --clean --fqbn realtek:AmebaD:Ai-Thinker_BW16 --warnings all RTL8720dn-Deauther
+```
+
+*(Khi nạp code trên macOS/Arduino IDE với BW16, nhấn giữ nút **BURN**, bấm nhả **RST**, rồi thả **BURN** để vào UART Download Mode ở baudrate chuẩn).*
+
+---
+
+## Kiểm thử tự động Host-Side (ASan & UBSan)
+
+Dự án cung cấp bộ mock phần cứng AmebaD (`tests/mock/`) và **4 suite unit test C++17** chạy trực tiếp với `-Wall -Wextra -Werror -fsanitize=address,undefined` (**355 assertions**):
+
+```sh
+mkdir -p tests/bin
+
