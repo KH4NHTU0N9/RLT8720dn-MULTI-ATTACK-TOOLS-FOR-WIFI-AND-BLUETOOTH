@@ -47,3 +47,17 @@ struct Ssd1306WireListener {
     uint8_t cmd_args[2] = {0, 0};
     uint8_t cmd_arg_pos = 0;
 
+    uint8_t col_start = 0;
+    uint8_t col_end = 127;
+    uint8_t page_start = 0;
+    uint8_t page_end = 7;
+    uint8_t cur_col = 0;
+    uint8_t cur_page = 0;
+
+    uint8_t gddram[128 * 8] = {0};
+    std::vector<uint8_t> commands;
+    size_t tx_count = 0;
+    size_t wrong_addr_count = 0;
+    size_t data_bytes_written = 0;
+    size_t data_pages_written = 0;
+
