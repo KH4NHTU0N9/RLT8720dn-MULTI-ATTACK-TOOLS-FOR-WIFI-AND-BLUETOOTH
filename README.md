@@ -88,3 +88,18 @@ clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefine
   RTL8720dn-Deauther/src/core/attack_runner.cpp \
   -o tests/bin/test_rf_and_ble && ./tests/bin/test_rf_and_ble
 
+# 4. WebStream chunking, XSS rendering & HTTP Router (92 assertions)
+clang++ -std=c++17 -Wall -Wextra -Werror -DUNIT_TEST -fsanitize=address,undefined \
+  -Itests/mock -IRTL8720dn-Deauther/src \
+  tests/test_web_and_router.cpp \
+  RTL8720dn-Deauther/src/web/web_ui.cpp \
+  RTL8720dn-Deauther/src/web/web_router.cpp \
+  RTL8720dn-Deauther/src/core/led_controller.cpp \
+  RTL8720dn-Deauther/src/oled/oled_display.cpp \
+  RTL8720dn-Deauther/src/spammer/spammer.cpp \
+  RTL8720dn-Deauther/src/interference/interference.cpp \
+  RTL8720dn-Deauther/src/packet-injection/packet-injection.cpp \
+  RTL8720dn-Deauther/src/ble/ble_manager.cpp \
+  RTL8720dn-Deauther/src/wifi/wifi_scanner.cpp \
+  RTL8720dn-Deauther/src/core/attack_runner.cpp \
+  -o tests/bin/test_web_and_router && ./tests/bin/test_web_and_router
