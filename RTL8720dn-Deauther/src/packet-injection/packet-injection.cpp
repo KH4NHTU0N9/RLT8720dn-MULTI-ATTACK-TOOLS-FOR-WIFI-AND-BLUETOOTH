@@ -111,3 +111,23 @@ bool wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid) {
     offset += ssid_len;
   }
 
+  static const uint8_t rates[] = {0x01, 0x08, 0x82, 0x84, 0x8B, 0x96, 0x0C, 0x12, 0x18, 0x24};
+  memcpy(&frame[offset], rates, sizeof(rates));
+  offset += sizeof(rates);
+
+  return wifi_tx_raw_frame(frame, offset);
+}
+
+bool wifi_tx_auth_frame(void* src_mac, void* dst_mac) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  AuthFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, dst_mac);
+  return wifi_tx_raw_frame(&frame, sizeof(AuthFrame));
+}
+
+bool wifi_tx_assoc_frame(void* src_mac, void* dst_mac) {
+  if (src_mac == nullptr || dst_mac == nullptr) return false;
+  AssocFrame frame;
+  _fill_mac_addrs(frame.destination, frame.source, frame.access_point, src_mac, dst_mac, dst_mac);
+  return wifi_tx_raw_frame(&frame, sizeof(AssocFrame));
+}
