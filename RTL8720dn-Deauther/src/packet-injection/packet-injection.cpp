@@ -92,3 +92,22 @@ bool wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid) {
   frame[0] = 0x80;
   _fill_mac_addrs(&frame[4], &frame[10], &frame[16], src_mac, dst_mac, src_mac);
 
+  uint64_t tsf = (uint64_t)micros();
+  memcpy(&frame[24], &tsf, 8);
+  uint16_t interval = 0x0064;
+  uint16_t caps = 0x0411;
+  memcpy(&frame[32], &interval, 2);
+  memcpy(&frame[34], &caps, 2);
+
+  size_t offset = 36;
+  size_t ssid_len = strlen(ssid);
+  if (ssid_len > 32) ssid_len = 32;
+  if (offset + 2 + ssid_len + 10 > sizeof(frame)) return false;
+
+  frame[offset++] = 0x00;
+  frame[offset++] = (uint8_t)ssid_len;
+  if (ssid_len > 0) {
+    memcpy(&frame[offset], ssid, ssid_len);
+    offset += ssid_len;
+  }
+
