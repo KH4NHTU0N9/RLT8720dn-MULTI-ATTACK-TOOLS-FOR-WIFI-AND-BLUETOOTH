@@ -216,7 +216,11 @@ static void _start_sniffer_for(int idx) {
     delay(30);
     wifi_enter_promisc_mode();
     delay(80);
-    wext_set_channel(WLAN0_NAME, t->target_channel);
+    int ch_ret = wext_set_channel(WLAN0_NAME, t->target_channel);
+    if (ch_ret < 0) {
+        DEBUG_SER_PRINT("[!] INT: wext_set_channel failed ch=");
+        DEBUG_SER_PRINTLN(t->target_channel);
+    }
     delay(CHANNEL_SWITCH_DELAY_MS * 4);
     sniffer_active = true;
     // RTW_PROMISC_ENABLE_2 (3) delivers all 802.11 management/data frames with length
@@ -324,7 +328,11 @@ void stop_interference() {
 
 static uint32_t _attack_target(BeaconClone* t) {
     bool is5GHz = (t->target_channel > 14);
-    wext_set_channel(WLAN0_NAME, t->target_channel);
+    int ch_ret = wext_set_channel(WLAN0_NAME, t->target_channel);
+    if (ch_ret < 0) {
+        DEBUG_SER_PRINT("[!] INT: wext_set_channel failed ch=");
+        DEBUG_SER_PRINTLN(t->target_channel);
+    }
     delay(CHANNEL_SWITCH_DELAY_MS);
 
     uint8_t* bssid = t->bssid;
