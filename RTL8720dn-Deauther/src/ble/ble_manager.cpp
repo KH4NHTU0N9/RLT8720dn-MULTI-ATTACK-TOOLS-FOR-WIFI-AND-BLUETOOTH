@@ -103,3 +103,25 @@ BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
                                       const uint8_t* payload, size_t payload_len) {
     if (!payload || payload_len == 0) return BleWriteStatus::BLE_WRITE_FAILED;
 
+    T_GAP_REMOTE_ADDR_TYPE gap_addr_type = (addr_type == GAP_REMOTE_ADDR_LE_RANDOM)
+                                           ? GAP_REMOTE_ADDR_LE_RANDOM
+                                           : GAP_REMOTE_ADDR_LE_PUBLIC;
+
+    BLE.end();
+    BLE.init();
+    BLE.beginCentral(1);
+
+    BleWriteStatus status = BleWriteStatus::BLE_WRITE_CONNECT_FAILED;
+    BLEConnect* pConn = BLE.configConnection();
+    int8_t conn_id = -1;
+
+    if (pConn != nullptr && pConn->connect((char*)mac.c_str(), gap_addr_type, BLE_CONNECT_WAIT_MS)) {
+        const unsigned long conn_start = millis();
+        while ((unsigned long)(millis() - conn_start) < BLE_CONNECT_WAIT_MS) {
+            conn_id = pConn->getConnId((char*)mac.c_str(), (uint8_t)gap_addr_type);
+            if (conn_id >= 0 && BLE.connected((uint8_t)conn_id)) {
+                break;
+            }
+            delay(50);
+        }
+
