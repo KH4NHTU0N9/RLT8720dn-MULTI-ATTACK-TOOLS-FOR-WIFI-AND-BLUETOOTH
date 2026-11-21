@@ -254,3 +254,27 @@ static void test_http_router_endpoints() {
         g_scan_results.push_back(ap);
     }
 
+    // 204 favicon, 404 unknown, 405 GET on POST endpoint, 400 malformed
+    {
+        MemoryWebOutput out;
+        const char r[] = "GET /favicon.ico HTTP/1.1\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(out.contains("HTTP/1.1 204 No Content\r\n"));
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "GET /unknown HTTP/1.1\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(out.contains("HTTP/1.1 404 Not Found\r\n"));
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "GET /deauth HTTP/1.1\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(out.contains("HTTP/1.1 405 Method Not Allowed\r\n"));
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "JUNK";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(out.contains("HTTP/1.1 400 Bad Request\r\n"));
