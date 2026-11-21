@@ -212,3 +212,18 @@ static void test_spammer_module() {
     ASSERT_EQ_INT(sent, MAX_SPAM_NETWORKS);
     ASSERT_EQ_INT(g_tx_frames.size(), MAX_SPAM_NETWORKS);
 
+    const auto& f = g_tx_frames[0];
+    ASSERT_EQ_INT(f[0], 0x80);
+    ASSERT_TRUE(f.size() <= MAX_BEACON_SIZE);
+    // SA/BSSID must be unicast + locally administered ((mac[0] & 0x03) == 0x02)
+    ASSERT_EQ_INT(f[10] & 0x03U, 0x02);
+    const uint8_t* ssid_ie = findTaggedIe(&f[36], f.size() - 36, 0);
+    const uint8_t* rate_ie = findTaggedIe(&f[36], f.size() - 36, 1);
+    const uint8_t* ds_ie = findTaggedIe(&f[36], f.size() - 36, 3);
+    ASSERT_TRUE(ssid_ie != nullptr && ssid_ie[1] >= 8 && ssid_ie[1] <= MAX_SSID_LEN);
+    ASSERT_TRUE(rate_ie != nullptr);
+    ASSERT_TRUE(ds_ie != nullptr && ds_ie[2] >= 1 && ds_ie[2] <= 13);
+
+    Spammer.stop();
+    ASSERT_FALSE(Spammer.isActive());
+}
