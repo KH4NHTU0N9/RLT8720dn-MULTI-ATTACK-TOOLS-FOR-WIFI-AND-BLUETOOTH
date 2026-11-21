@@ -157,3 +157,22 @@ static void _renderBandCard(WebStream& out, const char* title, const char* cls,
         if (is5GhzChannel(scan_results[i].channel) == want_5g) count++;
     }
 
+    out.writeStr("<div class='card'><div class='chd'><span>");
+    out.writeStr(title);
+    out.writeStr(" (");
+    out.writeInt((long)count);
+    out.writeStr(")</span><label style='display:flex;align-items:center;gap:6px;cursor:pointer'><input class='ck' type='checkbox' onclick=\"tog('");
+    out.writeStr(cls);
+    out.writeStr("',this.checked)\">All</label></div><div class='tbl-wrap'><table><thead><tr><th>Network</th><th>Signal</th><th style='text-align:center'>Pick</th></tr></thead><tbody>");
+
+    if (count == 0) {
+        out.writeStr("<tr><td colspan='3' class='meta'>No access points found in this band.</td></tr>");
+    } else {
+        for (size_t i = 0; i < scan_results.size(); i++) {
+            if (is5GhzChannel(scan_results[i].channel) == want_5g) {
+                webRenderScanRow(out, scan_results[i], i, cls);
+            }
+        }
+    }
+    out.writeStr("</tbody></table></div></div>");
+}
