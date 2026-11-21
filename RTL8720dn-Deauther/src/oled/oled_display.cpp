@@ -320,6 +320,32 @@ static void _draw_footer(uint32_t start_ms) {
     else           snprintf(buf, sizeof(buf), "UP:%02lu:%02lu", (unsigned long)(s / 60), (unsigned long)(s % 60));
     _text(14, y, buf, 1);
 
+    char sp[2] = { _spinner[_anim_frame % 4], 0 };
+    _text(120, y, sp, 1);
+}
+
+static void _draw_big_num(int x, int y, uint32_t num) {
+    char buf[16];
+    if      (num >= 1000000UL) snprintf(buf, sizeof(buf), "%lu.%luM", (unsigned long)(num / 1000000UL), (unsigned long)((num % 1000000UL) / 100000UL));
+    else if (num >= 100000UL)  snprintf(buf, sizeof(buf), "%luK", (unsigned long)(num / 1000UL));
+    else                       snprintf(buf, sizeof(buf), "%lu", (unsigned long)num);
+    _text(x, y, buf, 2);
+}
+
+// ===================================================================
+// PUBLIC API
+// ===================================================================
+bool oled_init() {
+    _i2c_init();
+    delay(50);
+    _ssd1306_init_hw();
+    _force_redraw = true;
+    memset(_prev_fb, 0xFF, sizeof(_prev_fb));
+    _clear();
+    _display();
+    _initialized = true;
+    return true;
+}
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
