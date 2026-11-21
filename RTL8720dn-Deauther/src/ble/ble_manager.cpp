@@ -139,3 +139,26 @@ BleWriteStatus bleWriteCharacteristic(const String& mac, uint8_t addr_type,
                     delay(50);
                 }
 
+                if (!pClient->discoveryDone()) {
+                    status = BleWriteStatus::BLE_WRITE_DISCOVERY_TIMEOUT;
+                } else {
+                    BLERemoteService* pService = pClient->getService(service_uuid.c_str());
+                    if (pService == nullptr) {
+                        status = BleWriteStatus::BLE_WRITE_SERVICE_NOT_FOUND;
+                    } else {
+                        BLERemoteCharacteristic* pChar = pService->getCharacteristic(char_uuid.c_str());
+                        if (pChar == nullptr) {
+                            status = BleWriteStatus::BLE_WRITE_CHAR_NOT_FOUND;
+                        } else if (pChar->setData((uint8_t*)payload, (uint16_t)payload_len)) {
+                            status = BleWriteStatus::BLE_WRITE_OK;
+                        } else {
+                            status = BleWriteStatus::BLE_WRITE_FAILED;
+                        }
+                    }
+                }
+            }
+            pConn->disconnect((uint8_t)conn_id);
+            delay(50);
+        }
+    }
+
