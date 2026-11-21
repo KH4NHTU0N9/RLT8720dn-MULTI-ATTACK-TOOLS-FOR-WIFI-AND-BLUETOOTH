@@ -306,3 +306,19 @@ static void _renderSettingsPanel(WebStream& out, const AppState& app,
     out.writeStr(" B)</b></div></div></div>");
 }
 
+void webRenderDashboard(IWebOutput& output,
+                        const AppState& app,
+                        const std::vector<WiFiScanResult>& scan_results,
+                        const std::vector<BLEAuditResult>& ble_results,
+                        bool led_enabled,
+                        size_t free_heap_bytes) {
+    WebStream out(output);
+    const String hdr = buildHttpResponseHeaders(200, "text/html");
+    out.writeBytes(hdr.c_str(), hdr.length());
+
+    out.writeStr(kHtmlHeadStart);
+    out.writeStr(kCssTheme);
+    out.writeStr(kCssLayout);
+    out.writeStr(kCssControls);
+    out.writeStr("</style></head><body><div class='wrap'>");
+
