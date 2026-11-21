@@ -292,6 +292,28 @@ bool add_interference_target(uint8_t* target_bssid, int channel) {
         return false;
     }
 
+    int idx = num_targets;
+    _init_target(&targets[idx], target_bssid, channel);
+    num_targets++;
+
+    DEBUG_SER_PRINT("[*] INT[");
+    DEBUG_SER_PRINT(idx);
+    DEBUG_SER_PRINT("]: Added BSSID=");
+    debugPrintMac(target_bssid);
+    DEBUG_SER_PRINT(" CH=");
+    DEBUG_SER_PRINTLN(channel);
+
+    if (idx == 0) {
+        _start_sniffer_for(0);
+        ledSetGreen(true);
+    } else {
+        _build_synthetic_payload(&targets[idx]);
+        DEBUG_SER_PRINT("[*] INT[");
+        DEBUG_SER_PRINT(idx);
+        DEBUG_SER_PRINT("]: Using synthetic payload.\n");
+    }
+    return true;
+}
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
