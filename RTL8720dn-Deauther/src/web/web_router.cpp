@@ -12,3 +12,17 @@
 #include "web_ui.h"
 #include <string.h>
 
+#ifndef UNIT_TEST
+#include "WiFiClient.h"
+#include "WiFiServer.h"
+extern "C" size_t xPortGetFreeHeapSize(void);
+
+class WiFiClientOutput : public IWebOutput {
+public:
+    explicit WiFiClientOutput(WiFiClient& c) : _c(c) {}
+    size_t writeBytes(const uint8_t* data, size_t len) override {
+        return _c.write(data, len);
+    }
+private:
+    WiFiClient& _c;
+};
