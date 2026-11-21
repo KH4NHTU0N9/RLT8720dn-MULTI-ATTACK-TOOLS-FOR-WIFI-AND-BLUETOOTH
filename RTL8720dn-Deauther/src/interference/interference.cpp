@@ -374,6 +374,23 @@ static uint32_t _attack_target(BeaconClone* t) {
             }
         }
 
+        if ((burst & 7) == 7) {
+            delay(1);
+        }
+    }
+    return sent;
+}
+
+static uint32_t _scatter_adjacent(BeaconClone* t) {
+    bool is5GHz = (t->target_channel > 14);
+    int adj_ch;
+    if (is5GHz) {
+        adj_ch = adj_channels_5g[adj_hop_idx % (int)(sizeof(adj_channels_5g) / sizeof(adj_channels_5g[0]))];
+    } else {
+        adj_ch = adj_channels_24[adj_hop_idx % (int)(sizeof(adj_channels_24) / sizeof(adj_channels_24[0]))];
+    }
+    adj_hop_idx++;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
