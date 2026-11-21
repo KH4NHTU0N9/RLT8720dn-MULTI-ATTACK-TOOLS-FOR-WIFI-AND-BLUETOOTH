@@ -16,4 +16,16 @@ public:
     int start_calls = 0;
     int stop_calls = 0;
 
+    void setAdvType(uint8_t t) { last_adv_type = t; }
+    void setMinInterval(uint16_t v) { min_interval = v; }
+    void setMaxInterval(uint16_t v) { max_interval = v; }
+    void setAdvData(uint8_t* data, uint8_t len) {
+        if (data && len > 0) last_adv_data.assign(data, data + len);
+        else last_adv_data.clear();
+    }
+    void stopAdv() { stop_calls++; }
+    void updateAdvertParams() {}
+    void startAdv() { start_calls++; }
+};
+
 #endif // MOCK_BLE_DEVICE_H
