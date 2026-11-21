@@ -55,4 +55,17 @@ public:
         init_calls = 0;
     }
 
+    void end() { end_calls++; }
+    void init() { init_calls++; client_configured = false; }
+    void beginCentral(uint8_t max_links) { (void)max_links; }
+    void beginPeripheral() {}
+
+    void setScanCallback(void (*cb)(T_LE_CB_DATA*)) {
+        scan.scan_cb = cb;
+    }
+
+    BLEScan* configScan() { return &scan; }
+    BLEConnect* configConnection() { return &conn; }
+    BLEAdvert* configAdvert() { return &advert; }
+
 #endif // MOCK_BLE_DEVICE_H
