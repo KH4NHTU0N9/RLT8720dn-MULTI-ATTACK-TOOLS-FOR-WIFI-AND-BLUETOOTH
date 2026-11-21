@@ -273,3 +273,21 @@ static void _handleBleWritePost(const std::vector<std::pair<String, String>>& pa
         else if (k == "data") hex_data = v;
     }
 
+    mac.trim();
+    service_uuid.trim();
+    char_uuid.trim();
+
+    if (mac.length() == 0 || service_uuid.length() == 0 || char_uuid.length() == 0) {
+        g_app.notice.set(StatusKind::STATUS_ERR, "MAC, Service UUID and Characteristic UUID are required.");
+        _writeRedirect(output, "/");
+        return;
+    }
+
+    uint8_t val[MAX_BLE_WRITE_BYTES];
+    size_t decoded_len = 0;
+    if (!decodeHexPayload(hex_data, val, sizeof(val), &decoded_len) || decoded_len == 0) {
+        g_app.notice.set(StatusKind::STATUS_ERR, "Invalid Hex payload (use even hex bytes, max 512B).");
+        _writeRedirect(output, "/");
+        return;
+    }
+
