@@ -323,3 +323,27 @@ static void test_http_router_endpoints() {
     }
     {
         MemoryWebOutput out;
+        const char r[] = "POST /interfere HTTP/1.1\r\n\r\ntarget=0&target=1";
+        ASSERT_TRUE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::INTERFERENCE);
+        ASSERT_TRUE(get_interference_state() != INT_STATE_IDLE);
+        stop_interference();
+    }
+
+    // POST /spam starts BEACON_SPAM from custom SSID list and warns when empty
+    resetWebState();
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /spam HTTP/1.1\r\n\r\nssids=&random_count=0";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::IDLE);
+        ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_WARN);
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /spam HTTP/1.1\r\n\r\nssids=Alpha+AP%0D%0ABeta+AP&count=2&random_count=0";
+        ASSERT_TRUE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::BEACON_SPAM);
+        ASSERT_TRUE(Spammer.isActive());
+        ASSERT_EQ_INT(Spammer.getNetworkCount(), 4);
+        Spammer.stop();
