@@ -42,3 +42,26 @@ struct __attribute__((packed)) BeaconFrame {
   uint8_t ssid_length = 0;
   uint8_t ssid[255];
 };
+
+struct __attribute__((packed)) AuthFrame {
+  uint16_t frame_control = 0xB0;
+  uint16_t duration = IEEE80211_MAX_NAV_DURATION;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+  uint16_t auth_algorithm = 0;
+  uint16_t auth_sequence = 1;
+  uint16_t status_code = 0;
+};
+
+struct __attribute__((packed)) AssocFrame {
+  uint16_t frame_control = 0x00;
+  uint16_t duration = IEEE80211_MAX_NAV_DURATION;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+  uint16_t cap_info = 0x0411;
+  uint16_t listen_interval = 0x0001;
+};
