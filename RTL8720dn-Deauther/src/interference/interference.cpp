@@ -122,6 +122,22 @@ static void _build_synthetic_payload(BeaconClone* t) {
         t->payload_len = tpl_len;
     }
     t->state = INT_STATE_ACTIVE;
+}
+
+static void _activate_synthetic(BeaconClone* t) {
+    if (!t) return;
+    sniffer_active = false;
+    rx_captured_ready = false;
+    wifi_set_promisc((rtw_rcr_level_t)0, NULL, 0);
+    _build_synthetic_payload(t);
+    if (t->payload) {
+        DEBUG_SER_PRINT("[!] INT: Synthetic fallback for CH");
+        DEBUG_SER_PRINTLN(t->target_channel);
+        ledSetGreen(false);
+    }
+}
+
+// ===================================================================
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
