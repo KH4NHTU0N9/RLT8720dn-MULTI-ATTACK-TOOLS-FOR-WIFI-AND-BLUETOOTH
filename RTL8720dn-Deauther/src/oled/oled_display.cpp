@@ -301,6 +301,25 @@ static bool _should_refresh() {
     _anim_frame++;
     return true;
 }
+
+static void _draw_header(const char* txt) {
+    _fill_rect(0, 0, OLED_SCREEN_WIDTH, 12, true);
+    if (txt) _text_inv(4, 2, txt, 1);
+}
+
+static void _draw_sep(int y) { _hline(0, y, OLED_SCREEN_WIDTH); }
+
+static void _draw_footer(uint32_t start_ms) {
+    const int y = 56;
+    _draw_sep(y - 2);
+    _circle(6, y + 3, 2, (_anim_frame % 2) != 0);
+
+    uint32_t s = (millis() - start_ms) / 1000;
+    char buf[16];
+    if (s >= 3600) snprintf(buf, sizeof(buf), "UP:%luh%02lum", (unsigned long)(s / 3600), (unsigned long)((s % 3600) / 60));
+    else           snprintf(buf, sizeof(buf), "UP:%02lu:%02lu", (unsigned long)(s / 60), (unsigned long)(s % 60));
+    _text(14, y, buf, 1);
+
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
