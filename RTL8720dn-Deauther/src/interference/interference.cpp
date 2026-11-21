@@ -257,6 +257,24 @@ static void _reset_all_targets() {
     last_blink_ms = 0;
     last_hb_ms = 0;
 }
+
+void start_interference(uint8_t* target_bssid, int channel) {
+    if (!target_bssid || channel <= 0) return;
+    _reset_all_targets();
+    num_targets = 1;
+    active_target = 0;
+    adj_hop_idx = 0;
+    csa_idx = 0;
+
+    _init_target(&targets[0], target_bssid, channel);
+    DEBUG_SER_PRINT("[*] INT[0]: BSSID=");
+    debugPrintMac(target_bssid);
+    DEBUG_SER_PRINT(" CH=");
+    DEBUG_SER_PRINTLN(channel);
+
+    _start_sniffer_for(0);
+    ledSetGreen(true);
+}
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
