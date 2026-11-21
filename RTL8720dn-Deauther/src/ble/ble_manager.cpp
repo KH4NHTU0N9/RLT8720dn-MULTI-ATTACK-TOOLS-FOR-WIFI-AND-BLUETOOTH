@@ -186,3 +186,21 @@ size_t bleBuildAppleSpamPayload(uint8_t* out_buf, size_t cap, int rotation, uint
     };
     memcpy(out_buf, apple, sizeof(apple));
     return sizeof(apple);
+}
+
+size_t bleBuildGoogleSpamPayload(uint8_t* out_buf, size_t cap, int rotation) {
+    if (!out_buf || cap < BLE_GOOGLE_PAYLOAD_LEN) return 0;
+    const int count = (int)(sizeof(kGoogleModels) / sizeof(kGoogleModels[0]));
+    const uint32_t g_model = kGoogleModels[(rotation < 0 ? 0 : rotation) % count];
+
+    const uint8_t google[BLE_GOOGLE_PAYLOAD_LEN] = {
+        0x02, 0x01, 0x02,
+        0x03, 0x03, 0x2C, 0xFE,
+        0x06, 0x16, 0x2C, 0xFE,
+        (uint8_t)((g_model >> 16) & 0xFF),
+        (uint8_t)((g_model >> 8) & 0xFF),
+        (uint8_t)(g_model & 0xFF)
+    };
+    memcpy(out_buf, google, sizeof(google));
+    return sizeof(google);
+}
