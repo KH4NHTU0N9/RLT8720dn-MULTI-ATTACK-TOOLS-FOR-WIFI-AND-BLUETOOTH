@@ -94,3 +94,19 @@ int webClampBeaconsPerSsid(const String& raw, int fallback) {
     }
     return (int)val;
 }
+
+int webClampRandomSsidCount(const String& raw) {
+    long val = 0;
+    if (!parseStrictIntRange(raw, 0, MAX_SPAM_NETWORKS, &val)) {
+        return 0;
+    }
+    return (int)val;
+}
+
+int webClampBleSpamType(const String& raw) {
+    long val = 0;
+    if (!parseStrictIntRange(raw, 0, 2, &val)) {
+        return 0;
+    }
+    return (int)val;
+}
