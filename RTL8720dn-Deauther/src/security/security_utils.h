@@ -279,4 +279,24 @@ static inline bool parseHttpRequestLine(const char* req, size_t req_len,
     memcpy(method_out, req, sp1);
     method_out[sp1] = '\0';
 
+    size_t p_start = sp1 + 1;
+    size_t p_end = p_start;
+    while (p_end < req_len && req[p_end] != ' ' && req[p_end] != '\r' && req[p_end] != '\n') {
+        p_end++;
+    }
+    if (p_end <= p_start) return false;
+
+    // Strip optional query string '?...'
+    size_t q_end = p_start;
+    while (q_end < p_end && req[q_end] != '?') {
+        q_end++;
+    }
+    size_t path_len = q_end - p_start;
+    if (path_len == 0 || path_len >= path_cap) {
+        return false;
+    }
+    memcpy(path_out, req + p_start, path_len);
+    path_out[path_len] = '\0';
+    return true;
+}
 #endif // SECURITY_UTILS_H
