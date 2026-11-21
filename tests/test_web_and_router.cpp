@@ -174,3 +174,17 @@ static void test_post_parser_and_clampers() {
     ASSERT_EQ_INT(webClampFramesPerDeauth("5001", 100), 100);
     ASSERT_EQ_INT(webClampFramesPerDeauth("450", 100), 450);
 
+    ASSERT_EQ_INT(webClampDeauthReason("0", 2), 2);
+    ASSERT_EQ_INT(webClampDeauthReason("65536", 2), 2);
+    ASSERT_EQ_INT(webClampDeauthReason("7", 2), 7);
+
+    ASSERT_EQ_INT(webClampBeaconsPerSsid("0", 3), 3);
+    ASSERT_EQ_INT(webClampBeaconsPerSsid("21", 3), 3);
+    ASSERT_EQ_INT(webClampBeaconsPerSsid("12", 3), 12);
+
+    ASSERT_EQ_INT(webClampRandomSsidCount("99"), 0);
+    ASSERT_EQ_INT(webClampRandomSsidCount("16"), 16);
+
+    ASSERT_EQ_INT(webClampBleSpamType("9"), 0);
+    ASSERT_EQ_INT(webClampBleSpamType("2"), 2);
+}
