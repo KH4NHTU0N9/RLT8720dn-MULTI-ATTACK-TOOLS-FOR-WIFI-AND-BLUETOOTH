@@ -417,3 +417,23 @@ static void test_ble_manager_payloads_scan_and_gatt_write() {
         "AA:00:00:00:00:01", GAP_REMOTE_ADDR_LE_PUBLIC, "FFE0", "BAD0", payload, sizeof(payload));
     ASSERT_TRUE(st == BleWriteStatus::BLE_WRITE_CHAR_NOT_FOUND);
 
+    mockBleInstance().client.disc_done = false;
+    st = bleWriteCharacteristic(
+        "AA:00:00:00:00:01", GAP_REMOTE_ADDR_LE_PUBLIC, "FFE0", "FFE1", payload, sizeof(payload));
+    ASSERT_TRUE(st == BleWriteStatus::BLE_WRITE_DISCOVERY_TIMEOUT);
+}
+
+int main() {
+    std::printf("Running RTL8720dn RF, Spammer, Interference, LED & BLE unit tests...\n");
+    test_packet_injection_frames_and_guards();
+    test_spammer_module();
+    test_interference_sniffer_deadlock_and_synthetic_fallback();
+    test_led_and_wifi_scanner();
+    test_ble_manager_payloads_scan_and_gatt_write();
+    if (g_tests_failed > 0) {
+        std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
+        return 1;
+    }
+    std::printf("PASSED: %d assertions\n", g_tests_run);
+    return 0;
+}
