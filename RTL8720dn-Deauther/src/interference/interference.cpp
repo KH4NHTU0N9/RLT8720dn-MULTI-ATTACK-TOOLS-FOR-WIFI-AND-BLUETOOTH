@@ -240,6 +240,23 @@ static void _init_target(BeaconClone* t, const uint8_t* bssid, int channel) {
     t->cycle_count = 0;
 }
 
+static void _reset_all_targets() {
+    sniffer_active = false;
+    rx_captured_ready = false;
+    rx_target_idx = -1;
+    wifi_set_promisc((rtw_rcr_level_t)0, NULL, 0);
+    for (int i = 0; i < MAX_INTERFERENCE_TARGETS; i++) {
+        targets[i].state = INT_STATE_IDLE;
+        if (targets[i].payload) {
+            free(targets[i].payload);
+            targets[i].payload = NULL;
+        }
+        targets[i].payload_len = 0;
+        targets[i].cycle_count = 0;
+    }
+    last_blink_ms = 0;
+    last_hb_ms = 0;
+}
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
