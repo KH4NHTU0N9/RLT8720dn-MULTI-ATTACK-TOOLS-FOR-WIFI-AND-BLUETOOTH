@@ -22,3 +22,15 @@ The codebase was refactored into a modular `src/` architecture and verified with
 | SEC-06 | Medium | CWE-113 / RFC 9112 | Standardized CRLF HTTP headers, RFC 9110 `303 See Other` redirects, `urlDecode()` with `%00` blocking, and GET vs POST enforcement (`405` / `404`). |
 | SEC-07 | Medium | CWE-362 / CWE-416 | Replaced shared unsynchronized RX writes with lock-free staging and `_reset_all_targets()` cleanup. |
 | SEC-08 | Medium | CWE-121 / CWE-476 | Guarded `rltk_wlan_running(0)`, null pointers, min `< 24` / max `> 1536` frame bounds, and SSID copy bounds. |
+| SEC-09 | Medium | CWE-798 / CWE-306 | Documented default credential rotation warning; eliminated idle `wext_set_channel` polling overhead; Web UI Auth/CSRF remains a deployment hardening item. |
+| SEC-10 | Low | CWE-120 | Replaced `sprintf` calls in OLED and MAC formatters with bounded `snprintf`. |
+| SEC-11 | Low | CWE-400 / CWE-120 | Bounded `_networks` at `MAX_SPAM_NETWORKS` (64) and checked exact remaining beacon frame capacity (`MAX_BEACON_SIZE`). |
+| SEC-12 | Low | CWE-20 | Added `[0, 100]` RSSI percentage clamp and complete `BLE.end()` resource cleanup after BLE operations. |
+
+---
+
+## 3. Comprehensive Firmware & Protocol Bugs Fixed (FW-01 .. FW-15)
+
+| ID | Category | Root Cause & Verified Fix |
+| :--- | :--- | :--- |
+| FW-01 | Critical Boot Crash | `oled_display.cpp`: `_i2c_init()` called `digitalWrite(OLED_SDA, LOW)` before `pinMode(OLED_SDA, OUTPUT)`, dereferencing unallocated `gpio_pin_struct[8]` inside AmebaD `wiring_digital.c` and triggering an early HardFault boot loop prior to `WiFi.apbegin()`. Fixed by calling `pinMode()` before any `digitalWrite()` and switching `_sda_high()` to `INPUT_PULLUP`. |
