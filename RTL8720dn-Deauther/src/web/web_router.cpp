@@ -368,3 +368,25 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return false;
     }
 
+    if (!_isKnownPostRoute(path)) {
+        webRenderPlainError(output, 404, "Not Found");
+        return false;
+    }
+
+    if (!_isPostMethod(method)) {
+        webRenderPlainError(output, 405, "Method Not Allowed (POST required)");
+        return false;
+    }
+
+    std::vector<std::pair<String, String>> params;
+    _extractPostParams(raw_req, req_len, params);
+
+    if (strcmp(path, "/rescan") == 0) {
+        if (post_scan_cb) post_scan_cb(cb_ctx);
+        char msg[64];
+        snprintf(msg, sizeof(msg), "Scan complete: %lu APs found.", (unsigned long)g_scan_results.size());
+        g_app.notice.set(StatusKind::STATUS_OK, msg);
+        _writeRedirect(output, "/");
+        return false;
+    }
+
