@@ -62,3 +62,11 @@ void loop() {
 
   webServeClient(server);
 
+  static int last_idle_channel = -1;
+  if (g_app.channel_needs_restore || last_idle_channel != g_app.config.current_channel) {
+    wext_set_channel(WLAN0_NAME, g_app.config.current_channel);
+    last_idle_channel = g_app.config.current_channel;
+    g_app.channel_needs_restore = false;
+  }
+  delay(IDLE_LOOP_DELAY_MS);
+}
