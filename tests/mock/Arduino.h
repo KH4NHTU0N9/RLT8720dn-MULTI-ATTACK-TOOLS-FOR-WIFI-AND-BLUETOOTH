@@ -225,5 +225,19 @@ public:
 
     void println() { log += '\n'; }
 
+private:
+    void append(const char* s) { if (s) log += s; }
+    void append(const String& s) { log += s.c_str(); }
+    void append(char c) { log += c; }
+    void append(int v) { log += std::to_string(v); }
+    void append(unsigned int v) { log += std::to_string(v); }
+    void append(long v) { log += std::to_string(v); }
+    void append(unsigned long v) { log += std::to_string(v); }
+};
+
+inline MockSerial& mockSerialInstance() {
+    static MockSerial ser;
+    return ser;
+}
 
 #endif // MOCK_ARDUINO_H
