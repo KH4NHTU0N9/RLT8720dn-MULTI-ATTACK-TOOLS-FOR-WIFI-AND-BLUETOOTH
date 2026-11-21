@@ -234,3 +234,18 @@ static void test_refresh_throttling_and_attack_layouts() {
     ASSERT_TRUE(oled_init());
     oled_attack_start();
 
+    // Advance past OLED_REFRESH_MS so first attack screen draws immediately
+    mockAdvanceMillis(OLED_REFRESH_MS + 10);
+    listener.resetCounters();
+    oled_show_deauth(3, 1234);
+    ASSERT_TRUE(listener.data_pages_written > 0);
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 14, 127, 14), 128);
+    // Footer separator at y=54 (56 - 2)
+    ASSERT_EQ_INT(listener.countPixelsInRect(0, 54, 127, 54), 128);
+
+    // Calling again within OLED_REFRESH_MS must throttle (0 I2C traffic)
+    listener.resetCounters();
+    mockAdvanceMillis(50);
+    oled_show_deauth(3, 1300);
+    ASSERT_EQ_INT(listener.data_pages_written, 0);
+
