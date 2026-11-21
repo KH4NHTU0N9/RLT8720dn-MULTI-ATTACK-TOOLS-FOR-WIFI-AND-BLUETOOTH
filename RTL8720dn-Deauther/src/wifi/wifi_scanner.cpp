@@ -51,3 +51,27 @@ int wifiScanNetworks() {
         return 1;
     }
 
+    const unsigned long start_ms = millis();
+    while (!g_scan_done && (unsigned long)(millis() - start_ms) < 12500UL) {
+        delay(50);
+    }
+    g_scan_accepting = false;
+    g_app.channel_needs_restore = true;
+
+    DEBUG_SER_PRINT(" done! (");
+    DEBUG_SER_PRINT((unsigned long)g_scan_results.size());
+    DEBUG_SER_PRINTLN(" APs)");
+    return 0;
+}
+
+void wifiScanCountByBand(int* count_24, int* count_5g) {
+    int c24 = 0;
+    int c5g = 0;
+    for (size_t i = 0; i < g_scan_results.size(); i++) {
+        if (is5GhzChannel(g_scan_results[i].channel)) {
+            c5g++;
+        } else {
+            c24++;
+        }
+    }
+    if (count_24) *count_24 = c24;
