@@ -17,4 +17,20 @@ void SSIDSpammer::addSSID(const String& ssid) {
     if (_networks.size() >= MAX_SPAM_NETWORKS) return;
     if (ssid.length() == 0) return;
 
+    SpammedNetwork net;
+    net.ssid = (ssid.length() > MAX_SSID_LEN) ? ssid.substring(0, MAX_SSID_LEN) : ssid;
+    _generateRandomMAC(net.bssid);
+    _networks.push_back(net);
+}
+
+void SSIDSpammer::clearSSIDs() {
+    _networks.clear();
+}
+
+void SSIDSpammer::setRandomMode(bool enable, int count) {
+    _randomMode = enable;
+    if (count < 1) count = 1;
+    if (count > MAX_SPAM_NETWORKS) count = MAX_SPAM_NETWORKS;
+    _randomCount = count;
+}
 }
