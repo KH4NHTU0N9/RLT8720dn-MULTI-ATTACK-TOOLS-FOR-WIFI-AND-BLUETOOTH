@@ -12,4 +12,8 @@ typedef struct {
     uint8_t data_len;
 } T_LE_SCAN_INFO;
 
+typedef struct {
+    T_LE_SCAN_INFO* p_le_scan_info;
+} T_LE_CB_DATA;
+
 #endif // MOCK_GAP_CALLBACK_LE_H
