@@ -34,3 +34,16 @@ The codebase was refactored into a modular `src/` architecture and verified with
 | ID | Category | Root Cause & Verified Fix |
 | :--- | :--- | :--- |
 | FW-01 | Critical Boot Crash | `oled_display.cpp`: `_i2c_init()` called `digitalWrite(OLED_SDA, LOW)` before `pinMode(OLED_SDA, OUTPUT)`, dereferencing unallocated `gpio_pin_struct[8]` inside AmebaD `wiring_digital.c` and triggering an early HardFault boot loop prior to `WiFi.apbegin()`. Fixed by calling `pinMode()` before any `digitalWrite()` and switching `_sda_high()` to `INPUT_PULLUP`. |
+| FW-02 | RTOS Deadlock & RX Level | `interference.cpp`: Calling `wifi_set_promisc(0, NULL, 0)`, `malloc`, or GPIO/Serial APIs inside `_beacon_sniffer_cb` risked self-deadlock on non-recursive `promisc_sema`. Also fixed wrong level (`2` -> `3` `RTW_PROMISC_ENABLE_2` with `len_used = 1`). |
+| FW-03 | Beacon Tag Truncation | `interference.cpp`: Sniffer checked fixed `offset = 4/8` and truncated tags at arbitrary 400 B. Added `interference_sanitize_beacon_tags()` TLV boundary walker and fixed Frame Control / BSSID matching (`frame[0] == 0x80`, `&frame[16]`). |
+| FW-04 | Synthetic Band Mismatch | `interference.cpp`: Fixed 2.4 GHz vs 5 GHz IE leakage (no Tag 3 DS Param on 5 GHz; proper HT Cap + HT Op primary channel byte; non-DFS 5 GHz ghost/adjacent channels). |
+| FW-05 | 802.11 Framing & NAV | `packet-injection.h/.cpp`: Fixed `NullFrame` `0x48` erroneously carrying a QoS Control field (`24` B exact), fixed `CSAFrame` packing (`31` B), clamped NAV to `0x7FFF` (reserved bit 15 = 0 per IEEE 802.11-2020), fixed ECSA Tag 60 length `4` + IEEE operating classes (`81/115/118/121/124`), and stamped non-zero `micros()` TSF in beacons. |
+| FW-06 | BLE Advertisement & GATT | `ble_manager.cpp`: Fixed Apple Proximity payload TLV length mismatch (exact 30 bytes matching AD2 length `0x1A`), replaced `random(0, 255)` off-by-one with `random(256)`, removed duplicate 3500 ms scan sleep, added `BLE.configClient()`, async `getConnId()` polling, `GAP_REMOTE_ADDR_LE_RANDOM` support, and detailed `BleWriteStatus` reporting. |
+| FW-07 | LwIP Pool & Heap Churn | `web_stream.h`: Replaced ~400 tiny `client.print()` calls and linear `String` reallocations with a chunked `1024` B `WebStream` buffer matching `MEMP_NUM_TCP_SEG = 40`. |
+| FW-08 | OLED Dirty-Page Diff | `oled_display.cpp`: Added page-level `memcmp` diffing (`_prev_fb`) and cached GPIO states to eliminate redundant full-panel bit-bang updates, fixed Y-axis separator gap (`y=14`), and prevented horizontal text clipping (`G. FastPair`, `Win SwiftPair`). |
+| FW-09 | Input & Channel Consistency | `security_utils.h` & `web_router.cpp`: Replaced `String::toInt()` with `parseStrictIntRange()`, aligned `is24GhzChannel` (`1..14`) / `is5GhzChannel` (`> 14`) across scanner/UI/runner, implemented clean REST status codes (`400`/`404`/`405`/`413`), and fixed Early Idle interference recovery restarting `server.begin()`. |
+
+---
+
+## 4. Verification Matrix
+
