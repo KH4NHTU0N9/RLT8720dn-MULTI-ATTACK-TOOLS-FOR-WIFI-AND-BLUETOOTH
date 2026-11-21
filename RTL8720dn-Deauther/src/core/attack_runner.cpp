@@ -143,3 +143,18 @@ static void _runInterferenceLoop(WiFiServer& server) {
         delay(1);
     }
 }
+
+static void _runSpamLoop() {
+    oled_attack_start();
+    g_app.channel_needs_restore = true;
+    const int ssid_count = (int)Spammer.getNetworkCount();
+
+    while (g_app.attack_mode == AttackMode::BEACON_SPAM) {
+        uint32_t sent = Spammer.run();
+        g_app.sent_frames += sent;
+        if (sent > 0) {
+            ledToggleBlue();
+        }
+        oled_show_spammer(ssid_count);
+    }
+}
