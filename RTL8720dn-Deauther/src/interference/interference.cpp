@@ -198,6 +198,32 @@ static void _finalize_captured_beacon() {
             DEBUG_SER_PRINT(" Tags=");
             DEBUG_SER_PRINT((unsigned long)rx_tags_len);
             DEBUG_SER_PRINTLN("B");
+            ledSetGreen(false);
+            return;
+        }
+    }
+    t->state = INT_STATE_IDLE;
+    ledSetGreen(false);
+}
+
+static void _start_sniffer_for(int idx) {
+    if (idx < 0 || idx >= MAX_INTERFERENCE_TARGETS) return;
+    BeaconClone* t = &targets[idx];
+    sniffer_active = false;
+    rx_captured_ready = false;
+    rx_target_idx = idx;
+    wifi_set_promisc((rtw_rcr_level_t)0, NULL, 0);
+    delay(30);
+    wifi_enter_promisc_mode();
+    delay(80);
+    wext_set_channel(WLAN0_NAME, t->target_channel);
+    delay(CHANNEL_SWITCH_DELAY_MS * 4);
+    sniffer_active = true;
+    // RTW_PROMISC_ENABLE_2 (3) delivers all 802.11 management/data frames with length
+    wifi_set_promisc((rtw_rcr_level_t)3, _beacon_sniffer_cb, 1);
+    DEBUG_SER_PRINT("[*] INT: Sniffer on CH");
+    DEBUG_SER_PRINTLN(t->target_channel);
+}
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
