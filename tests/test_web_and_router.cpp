@@ -206,3 +206,17 @@ static void test_dashboard_ui_and_xss_protection() {
     ap5.channel = 149;
     g_scan_results.push_back(ap5);
 
+    BLEAuditResult ble{};
+    ble.name = "AirTag<img>";
+    std::snprintf(ble.address, sizeof(ble.address), "12:34:56:78:9A:BC");
+    ble.addr_type = 1;
+    ble.rssi = -60;
+    g_ble_results.push_back(ble);
+
+    g_app.notice.set(StatusKind::STATUS_OK, "Ready <ok> & steady");
+
+    MemoryWebOutput out;
+    const char req[] = "GET / HTTP/1.1\r\nHost: 192.168.1.1\r\n\r\n";
+    CallbackRecorder rec;
+    ASSERT_FALSE(webRouteRawRequest(req, std::strlen(req), out, testPostScanCb, testPrepareAttackCb, &rec));
+
