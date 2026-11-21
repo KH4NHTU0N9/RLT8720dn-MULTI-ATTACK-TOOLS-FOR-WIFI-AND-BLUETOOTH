@@ -50,6 +50,23 @@ static void _scl_high() {
     }
 }
 
+static void _scl_low() {
+    if (_scl_is_high) {
+        digitalWrite(OLED_SCL, LOW);
+        _scl_is_high = false;
+    }
+}
+
+static void _i2c_init() {
+    // AmebaD allocates gpio_pin_struct[pin] inside pinMode(); initialize before digitalWrite().
+    pinMode(OLED_SDA, OUTPUT);
+    digitalWrite(OLED_SDA, LOW);
+    _sda_is_out = true;
+
+    pinMode(OLED_SCL, OUTPUT);
+    digitalWrite(OLED_SCL, HIGH);
+    _scl_is_high = true;
+
     _sda_high();
     _i2c_dly();
 }
