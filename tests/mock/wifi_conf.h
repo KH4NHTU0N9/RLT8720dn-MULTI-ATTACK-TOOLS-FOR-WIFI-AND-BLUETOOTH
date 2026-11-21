@@ -98,4 +98,22 @@ static inline rtw_result_t wifi_scan_networks(scan_result_handler_t results_hand
         rtw_scan_handler_result_t item{};
         item.scan_complete = 0;
         item.ap_details = w.canned_scan_results[i];
+        results_handler(&item);
+    }
+    rtw_scan_handler_result_t done{};
+    done.scan_complete = 1;
+    results_handler(&done);
+    return RTW_SUCCESS;
+}
+} // extern "C"
+
+static inline void mockWifiInjectPromiscFrame(unsigned char* frame, unsigned int len, void* arg = nullptr) {
+    MockWifiState& w = mockWifi();
+    if (w.promisc_cb && w.promisc_level != RTW_PROMISC_DISABLE) {
+        w.in_promisc_callback = true;
+        w.promisc_cb(frame, w.promisc_len_used ? len : 0, arg);
+        w.in_promisc_callback = false;
+    }
+}
+
 #endif // MOCK_WIFI_CONF_H
