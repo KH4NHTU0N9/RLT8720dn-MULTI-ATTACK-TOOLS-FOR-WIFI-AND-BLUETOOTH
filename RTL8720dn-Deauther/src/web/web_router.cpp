@@ -316,3 +316,21 @@ static void _handleBleWritePost(const std::vector<std::pair<String, String>>& pa
         case BleWriteStatus::BLE_WRITE_FAILED:
         default:
             g_app.notice.set(StatusKind::STATUS_ERR, "BLE characteristic write failed.");
+            break;
+    }
+#endif
+    _writeRedirect(output, "/");
+}
+
+static bool _isKnownPostRoute(const char* path) {
+    if (!path) return false;
+    static const char* const kPostPaths[] = {
+        "/rescan", "/deauth", "/interfere", "/interference",
+        "/setframes", "/setconfig", "/led_enable", "/led_disable",
+        "/spam", "/blescan", "/blewrite", "/blespam"
+    };
+    for (size_t i = 0; i < sizeof(kPostPaths) / sizeof(kPostPaths[0]); i++) {
+        if (strcmp(path, kPostPaths[i]) == 0) return true;
+    }
+    return false;
+}
