@@ -157,3 +157,20 @@ static void test_post_parser_and_clampers() {
     const char body[] = "target=0&target=2&frames=250&empty=&ssids=Free+WiFi%0ATest%26Net%00Evil&reason=8";
     webParsePostBody(body, std::strlen(body), params);
 
+    ASSERT_EQ_INT(params.size(), 6);
+    ASSERT_STREQ(params[0].first, "target");
+    ASSERT_STREQ(params[0].second, "0");
+    ASSERT_STREQ(params[2].first, "frames");
+    ASSERT_STREQ(params[2].second, "250");
+    ASSERT_STREQ(params[3].first, "empty");
+    ASSERT_STREQ(params[3].second, "");
+    ASSERT_STREQ(params[4].first, "ssids");
+    ASSERT_STREQ(params[4].second, "Free WiFi\nTest&NetEvil");
+
+    // Parameter clamping must never confuse "" or "abc" with valid 0!
+    ASSERT_EQ_INT(webClampFramesPerDeauth("", 100), 100);
+    ASSERT_EQ_INT(webClampFramesPerDeauth("abc", 100), 100);
+    ASSERT_EQ_INT(webClampFramesPerDeauth("0", 100), 100);
+    ASSERT_EQ_INT(webClampFramesPerDeauth("5001", 100), 100);
+    ASSERT_EQ_INT(webClampFramesPerDeauth("450", 100), 450);
+
