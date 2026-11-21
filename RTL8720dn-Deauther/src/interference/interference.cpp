@@ -155,6 +155,23 @@ static void _beacon_sniffer_cb(unsigned char* frame, unsigned int len, void* arg
     BeaconClone* t = &targets[idx];
     if (t->state != INT_STATE_CAPTURING) return;
 
+    if (memcmp(&frame[16], t->bssid, 6) != 0) return;
+
+    size_t valid_len = interference_sanitize_beacon_tags(&frame[36], (size_t)(len - 36), MAX_BEACON_TAGS_LEN);
+    if (valid_len == 0) return;
+
+    memcpy(&rx_beacon_interval, &frame[32], 2);
+    memcpy(&rx_capabilities, &frame[34], 2);
+    memcpy(rx_tags_buf, &frame[36], valid_len);
+    rx_tags_len = valid_len;
+
+    sniffer_active = false;
+    rx_captured_ready = true;
+}
+
+static void _finalize_captured_beacon() {
+    if (!rx_captured_ready) return;
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
