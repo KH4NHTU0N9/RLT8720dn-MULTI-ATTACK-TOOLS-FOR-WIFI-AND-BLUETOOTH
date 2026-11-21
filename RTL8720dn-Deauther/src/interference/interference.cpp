@@ -224,6 +224,22 @@ static void _start_sniffer_for(int idx) {
     DEBUG_SER_PRINT("[*] INT: Sniffer on CH");
     DEBUG_SER_PRINTLN(t->target_channel);
 }
+
+static void _init_target(BeaconClone* t, const uint8_t* bssid, int channel) {
+    if (t->payload) {
+        free(t->payload);
+        t->payload = NULL;
+    }
+    memcpy(t->bssid, bssid, 6);
+    t->target_channel = channel;
+    t->payload_len = 0;
+    t->start_time = millis();
+    t->state = INT_STATE_CAPTURING;
+    t->beacon_interval = 0x64;
+    t->capabilities = 0x0411;
+    t->cycle_count = 0;
+}
+
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
