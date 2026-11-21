@@ -502,3 +502,25 @@ void webServeClient(WiFiServer& server) {
         return;
     }
 
+    ledShowHttpBusy();
+
+    static char req_buf[MAX_HTTP_REQ_SIZE + 1];
+    size_t req_len = 0;
+    bool req_oversized = false;
+    bool req_bad = false;
+    long content_length = -1;
+    size_t header_end = (size_t)-1;
+    const unsigned long req_start = millis();
+
+    while (client.connected() && (unsigned long)(millis() - req_start) < HTTP_REQ_TIMEOUT_MS) {
+        while (client.available()) {
+            int c = client.read();
+            if (c < 0) break;
+            if (req_len >= MAX_HTTP_REQ_SIZE) {
+                req_oversized = true;
+                break;
+            }
+            req_buf[req_len++] = (char)c;
+        }
+        if (req_oversized) break;
+
