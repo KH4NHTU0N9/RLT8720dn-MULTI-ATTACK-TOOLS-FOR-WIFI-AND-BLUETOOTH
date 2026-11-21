@@ -81,6 +81,30 @@ static inline bool decodeHexPayload(const String& hex_data, uint8_t* out_buf, si
         start += 2;
     }
 
+    int high_nibble = -1;
+    size_t byte_count = 0;
+    for (size_t i = start; i < raw_len; i++) {
+        char c = raw[i];
+        if (c == ' ' || c == '\t') {
+            if (high_nibble >= 0) return false; // Disallow splitting nibbles within a byte
+            continue;
+        }
+        int nib = hexNibble(c);
+        if (nib < 0) {
+            *out_len = 0;
+            return false;
+        }
+        if (high_nibble < 0) {
+            high_nibble = nib;
+        } else {
+            if (byte_count >= max_out_len) {
+                *out_len = 0;
+                return false;
+            }
+            out_buf[byte_count++] = (uint8_t)((high_nibble << 4) | nib);
+            high_nibble = -1;
+        }
+    }
     return true;
 }
 
