@@ -1,13 +1,20 @@
 #ifndef MOCK_ARDUINO_H
 #define MOCK_ARDUINO_H
 
+#include <algorithm>
 #include <cctype>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+
+#define LOW          0x0
+#define HIGH         0x1
+#define INPUT        0x0
+#define OUTPUT       0x1
+#define INPUT_PULLUP 0x2
 
 class String {
 public:
