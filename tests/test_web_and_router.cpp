@@ -142,3 +142,18 @@ static void test_web_stream_chunking_and_abort() {
     ASSERT_TRUE(out.chunk_sizes.size() >= 3);
     ASSERT_TRUE(out.contains("&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;"));
 
+    // Aborted stream stops forwarding subsequent writes
+    MemoryWebOutput fail_out;
+    fail_out.fail_next_write = true;
+    WebStream ws_abort(fail_out);
+    ws_abort.writeStr("abc");
+    ASSERT_FALSE(ws_abort.flush());
+    ASSERT_TRUE(ws_abort.aborted());
+    ASSERT_EQ_INT(fail_out.chunk_sizes.size(), 0);
+}
+
+static void test_post_parser_and_clampers() {
+    std::vector<std::pair<String, String>> params;
+    const char body[] = "target=0&target=2&frames=250&empty=&ssids=Free+WiFi%0ATest%26Net%00Evil&reason=8";
+    webParsePostBody(body, std::strlen(body), params);
+
