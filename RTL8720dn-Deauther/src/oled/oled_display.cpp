@@ -243,6 +243,22 @@ static void _char(int x, int y, char c, int sz, bool inv) {
     }
 }
 
+static int _text(int x, int y, const char* s, int sz) {
+    if (!s) return x;
+    while (*s) { _char(x, y, *s, sz, false); x += 6 * sz; s++; }
+    return x;
+}
+
+static int _text_inv(int x, int y, const char* s, int sz) {
+    if (!s) return x;
+    while (*s) { _char(x, y, *s, sz, true); x += 6 * sz; s++; }
+    return x;
+}
+
+static void _hline(int x, int y, int w) {
+    for (int i = 0; i < w; i++) _pixel(x + i, y, true);
+}
+
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
