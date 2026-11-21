@@ -75,3 +75,13 @@ void wifiScanCountByBand(int* count_24, int* count_5g) {
         }
     }
     if (count_24) *count_24 = c24;
+    if (count_5g) *count_5g = c5g;
+}
+
+void wifiRestoreSoftAp(int channel) {
+    char ch_buf[8];
+    snprintf(ch_buf, sizeof(ch_buf), "%d", channel);
+    WiFi.apbegin((char*)DEFAULT_AP_SSID, (char*)DEFAULT_AP_PASS, ch_buf);
+    wifi_disable_powersave();
+    g_app.channel_needs_restore = true;
+}
