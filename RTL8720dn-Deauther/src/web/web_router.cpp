@@ -464,3 +464,22 @@ bool webRouteRawRequest(const char* raw_req, size_t req_len,
         return true;
     }
 
+    webRenderPlainError(output, 404, "Not Found");
+    return false;
+}
+
+#ifndef UNIT_TEST
+struct ServerContext {
+    WiFiServer* server;
+    WiFiClient* client;
+};
+
+static bool _doWifiRescan(void* ctx) {
+    (void)ctx;
+    oled_show_scanning();
+    wifiScanNetworks();
+    int c24 = 0, c5g = 0;
+    wifiScanCountByBand(&c24, &c5g);
+    oled_show_idle(c24, c5g);
+    return true;
+}
