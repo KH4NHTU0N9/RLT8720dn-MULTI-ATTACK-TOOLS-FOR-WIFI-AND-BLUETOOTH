@@ -110,3 +110,17 @@ int webClampBleSpamType(const String& raw) {
     }
     return (int)val;
 }
+
+static size_t _findHeaderEnd(const char* buf, size_t len) {
+    if (!buf || len < 4) return (size_t)-1;
+    for (size_t i = 0; i + 3 < len; i++) {
+        if (buf[i] == '\r' && buf[i + 1] == '\n' && buf[i + 2] == '\r' && buf[i + 3] == '\n') {
+            return i;
+        }
+    }
+    return (size_t)-1;
+}
+
+static bool _isPostMethod(const char* method) {
+    return method && strcmp(method, "POST") == 0;
+}
