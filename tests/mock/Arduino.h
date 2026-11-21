@@ -116,5 +116,22 @@ struct MockArduinoState {
     uint32_t pin_mode_calls = 0;
     uint32_t write_before_pinmode_violations = 0;
 
+    void (*on_gpio_event)(uint8_t pin, uint8_t mode, uint8_t level, void* ctx) = nullptr;
+    void* on_gpio_ctx = nullptr;
+
+    void reset() {
+        clock_ms = 0;
+        clock_us = 0;
+        prng_state = 0x12345678u;
+        std::memset(pin_initialized, 0, sizeof(pin_initialized));
+        std::memset(pin_mode, 0, sizeof(pin_mode));
+        std::memset(pin_level, 0, sizeof(pin_level));
+        digital_write_calls = 0;
+        pin_mode_calls = 0;
+        write_before_pinmode_violations = 0;
+        on_gpio_event = nullptr;
+        on_gpio_ctx = nullptr;
+    }
+};
 
 #endif // MOCK_ARDUINO_H
