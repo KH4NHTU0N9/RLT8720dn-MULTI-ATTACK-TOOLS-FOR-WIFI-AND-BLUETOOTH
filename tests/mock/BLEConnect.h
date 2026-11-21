@@ -31,4 +31,10 @@ public:
         return fake_conn_id;
     }
 
+    void disconnect(uint8_t conn_id) {
+        (void)conn_id;
+        disconnect_calls++;
+    }
+};
+
 #endif // MOCK_BLE_CONNECT_H
