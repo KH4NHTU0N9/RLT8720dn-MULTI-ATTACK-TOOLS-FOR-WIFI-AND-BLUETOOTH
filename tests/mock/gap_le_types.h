@@ -1,0 +1,13 @@
+#ifndef MOCK_GAP_LE_TYPES_H
+#define MOCK_GAP_LE_TYPES_H
+
+#include <cstdint>
+
+typedef enum {
+    GAP_REMOTE_ADDR_LE_PUBLIC = 0,
+    GAP_REMOTE_ADDR_LE_RANDOM = 1
+} T_GAP_REMOTE_ADDR_TYPE;
+
+#define GAP_ADTYPE_ADV_NONCONN_IND 0x03
+
+#endif // MOCK_GAP_LE_TYPES_H
