@@ -37,4 +37,14 @@ public:
     int discover_calls = 0;
     BLERemoteService* service = nullptr;
 
+    void discoverServices() { discover_calls++; }
+    bool discoveryDone() const { return disc_done; }
+    bool connected() const { return is_connected; }
+
+    BLERemoteService* getService(const char* target_uuid) {
+        if (!service || !target_uuid) return nullptr;
+        return (service->uuid == target_uuid) ? service : nullptr;
+    }
+};
+
 #endif // MOCK_BLE_CLIENT_H
