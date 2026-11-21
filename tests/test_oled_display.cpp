@@ -31,3 +31,19 @@ static int g_tests_failed = 0;
         }                                                                          \
     } while (0)
 
+struct Ssd1306WireListener {
+    static constexpr uint8_t PIN_SCL = 7;
+    static constexpr uint8_t PIN_SDA = 8;
+
+    uint8_t prev_scl = 1;
+    uint8_t prev_sda = 1;
+    bool in_tx = false;
+    int bit_idx = 0;
+    uint8_t cur_byte = 0;
+    int byte_pos = 0;
+    uint8_t ctrl_byte = 0;
+    uint8_t cmd_wait = 0;
+    uint8_t pending_cmd = 0;
+    uint8_t cmd_args[2] = {0, 0};
+    uint8_t cmd_arg_pos = 0;
+
