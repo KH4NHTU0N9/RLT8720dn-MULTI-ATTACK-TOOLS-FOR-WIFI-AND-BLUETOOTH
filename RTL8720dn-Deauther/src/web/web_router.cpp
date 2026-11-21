@@ -229,3 +229,26 @@ static void _handleSpamPost(const std::vector<std::pair<String, String>>& params
                     ssids.push_back(line);
                 }
                 if (end >= len) break;
+                start = end + 1;
+            }
+        }
+    }
+
+    if (random_count <= 0 && ssids.empty()) {
+        g_app.notice.set(StatusKind::STATUS_WARN, "Enter at least 1 SSID or set Random SSIDs > 0.");
+        _writeRedirect(output, "/");
+        return;
+    }
+
+    Spammer.clearSSIDs();
+    if (random_count > 0) {
+        Spammer.setRandomMode(true, random_count);
+    } else {
+        Spammer.setRandomMode(false);
+        for (size_t i = 0; i < ssids.size(); i++) {
+            for (int c = 0; c < g_app.config.beacons_per_ssid; c++) {
+                Spammer.addSSID(ssids[i]);
+            }
+        }
+    }
+
