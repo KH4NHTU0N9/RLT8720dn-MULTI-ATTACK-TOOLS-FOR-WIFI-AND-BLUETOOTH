@@ -86,31 +86,22 @@ static void _i2c_stop() {
 
 static void _i2c_write(uint8_t d) {
     for (int i = 7; i >= 0; i--) {
-        if (d & (1 << i)) _sda_high(); else _sda_low();
+        if (d & (uint8_t)(1U << i)) _sda_high();
+        else                        _sda_low();
         _i2c_dly();
         _scl_high(); _i2c_dly();
         _scl_low();  _i2c_dly();
     }
-    _sda_high(); _i2c_dly();   // ACK clock (we ignore ACK value)
+    // 9th clock cycle for ACK (ignored if no display attached)
+    _sda_high(); _i2c_dly();
     _scl_high(); _i2c_dly();
     _scl_low();  _i2c_dly();
 }
 
 static void _i2c_begin() {
     _i2c_start();
-    _i2c_write(OLED_ADDR << 1); // Address + Write bit
+    _i2c_write((uint8_t)(OLED_I2C_ADDR << 1));
 }
-
-// ===================================================================
-// SSD1306 LOW-LEVEL
-// ===================================================================
-static void _cmd(uint8_t c) {
-    _i2c_begin();
-    _i2c_write(0x00);  // Control: command mode
-    _i2c_write(c);
-    _i2c_stop();
-}
-
 static void _ssd1306_init_hw() {
     static const uint8_t init[] = {
         0xAE,        // Display OFF
