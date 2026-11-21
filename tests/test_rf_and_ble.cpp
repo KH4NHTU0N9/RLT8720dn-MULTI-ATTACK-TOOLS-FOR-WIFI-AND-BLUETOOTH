@@ -77,3 +77,20 @@ bool unit_test_capture_raw_frame(const void* frame, size_t length) {
     return true;
 }
 }
+
+static void resetHarness() {
+    mockArduino().reset();
+    ledInit();
+    mockWifi().reset();
+    mockBleInstance().reset();
+    g_tx_frames.clear();
+    g_wlan_running_flag = 1;
+    rltk_wlan_info = g_fake_wlan_storage;
+    g_app = AppState{};
+    g_scan_results.clear();
+    g_ble_results.clear();
+    g_deauth_channels.clear();
+    stop_interference();
+    Spammer.stop();
+    Spammer.clearSSIDs();
+}
