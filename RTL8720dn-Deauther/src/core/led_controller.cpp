@@ -76,3 +76,17 @@ void ledToggleGreen() {
     g_g_state = !g_g_state;
     applyPins();
 }
+
+void ledToggleBlue() {
+    if (!g_led_enabled) return;
+    g_b_state = !g_b_state;
+    applyPins();
+}
+
+void ledOff() {
+    g_r_state = false;
+    g_g_state = false;
+    g_b_state = false;
+    applyPins();
+}
+
