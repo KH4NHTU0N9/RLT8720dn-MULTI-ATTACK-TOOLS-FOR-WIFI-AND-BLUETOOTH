@@ -414,6 +414,12 @@ void oled_show_deauth(int num_targets, uint32_t frames) {
     _draw_footer(_attack_start);
     _display();
 }
+
+void oled_show_interference(int active, int max_t) {
+    if (!_initialized || !_should_refresh()) return;
+    _clear();
+    _draw_header(" > INTERFERENCE");
+    _draw_sep(14);
     char buf[24];
     snprintf(buf, sizeof(buf), "Targets: %d/%d", active, max_t);
     _text(4, 18, buf, 1);
