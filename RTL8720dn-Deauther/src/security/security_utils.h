@@ -299,4 +299,21 @@ static inline bool parseHttpRequestLine(const char* req, size_t req_len,
     path_out[path_len] = '\0';
     return true;
 }
+
+// Case-insensitive Content-Length extraction anchored at header line start.
+// Returns:  1 = valid Content-Length parsed into *out_len
+//           0 = no Content-Length header found (*out_len = 0)
+//          -1 = malformed/negative/overflow Content-Length header (reject 400/413)
+static inline int extractHttpContentLength(const char* req, size_t header_end, long* out_len) {
+    if (!req || !out_len) return -1;
+    *out_len = 0;
+
+    static const char kHeaderName[] = "content-length:";
+    const size_t kNameLen = sizeof(kHeaderName) - 1;
+
+    size_t pos = 0;
+    // Skip request line
+    while (pos < header_end && req[pos] != '\n') pos++;
+    if (pos < header_end) pos++;
+
 #endif // SECURITY_UTILS_H
