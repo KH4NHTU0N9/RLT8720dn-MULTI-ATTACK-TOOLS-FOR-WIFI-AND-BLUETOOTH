@@ -50,4 +50,18 @@ void SSIDSpammer::start() {
         return;
     }
 
+    _active = true;
+    _currentChannel = 1;
+    _lastChannelHop = millis();
+    wext_set_channel(WLAN0_NAME, _currentChannel);
+    DEBUG_SER_PRINT("[+] Spammer: Started flooding with ");
+    DEBUG_SER_PRINT((unsigned long)_networks.size());
+    DEBUG_SER_PRINT(" networks.\n");
+}
+
+void SSIDSpammer::stop() {
+    if (!_active) return;
+    _active = false;
+    DEBUG_SER_PRINT("[-] Spammer: Stopped.\n");
+}
 }
