@@ -231,3 +231,24 @@ static void _renderBlePanel(WebStream& out, const AppState& app,
     out.writeStr(")</span><form method='post' action='/blescan'><button class='btn pri sm' type='submit'>Scan BLE</button></form></div>"
                  "<div class='tbl-wrap'><table><thead><tr><th>Device</th><th>RSSI</th><th>Pick</th></tr></thead><tbody>");
 
+    if (ble_results.empty()) {
+        out.writeStr("<tr><td colspan='3' class='meta'>Press Scan BLE to discover nearby peripherals.</td></tr>");
+    } else {
+        for (size_t i = 0; i < ble_results.size(); i++) {
+            const BLEAuditResult& dev = ble_results[i];
+            out.writeStr("<tr><td><div class='ssid'>");
+            out.writeHtmlEscaped(dev.name.c_str());
+            out.writeStr("</div><div class='meta'>");
+            out.writeHtmlEscaped(dev.address);
+            out.writeStr(" &middot; ");
+            out.writeStr((dev.addr_type == 1) ? "RND" : "PUB");
+            out.writeStr("</div></td><td>");
+            out.writeInt((long)dev.rssi);
+            out.writeStr(" dBm</td><td><button class='btn sm pri' type='button' onclick=\"pickBle('");
+            out.writeHtmlEscaped(dev.address);
+            out.writeStr("',");
+            out.writeUInt((unsigned long)(dev.addr_type == 1 ? 1 : 0));
+            out.writeStr(")\">Select</button></td></tr>");
+        }
+    }
+
