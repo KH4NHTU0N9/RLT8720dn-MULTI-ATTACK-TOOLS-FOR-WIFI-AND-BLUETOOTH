@@ -252,3 +252,24 @@ static void _handleSpamPost(const std::vector<std::pair<String, String>>& params
         }
     }
 
+    g_app.attack_mode = AttackMode::BEACON_SPAM;
+    g_app.sent_frames = 0;
+    _writeRedirect(output, "/");
+    if (prepare_attack_cb) prepare_attack_cb(cb_ctx);
+    Spammer.start();
+}
+
+static void _handleBleWritePost(const std::vector<std::pair<String, String>>& params, IWebOutput& output) {
+    String mac, service_uuid, char_uuid, hex_data;
+    long addr_type = 0;
+
+    for (size_t i = 0; i < params.size(); i++) {
+        const String& k = params[i].first;
+        const String& v = params[i].second;
+        if (k == "mac") mac = v;
+        else if (k == "addr_type") parseStrictIntRange(v, 0, 1, &addr_type);
+        else if (k == "service") service_uuid = v;
+        else if (k == "char") char_uuid = v;
+        else if (k == "data") hex_data = v;
+    }
+
