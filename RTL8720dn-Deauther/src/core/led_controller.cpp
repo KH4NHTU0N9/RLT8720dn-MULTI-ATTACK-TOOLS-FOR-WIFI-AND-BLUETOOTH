@@ -58,3 +58,21 @@ void ledSetRed(bool on) {
     g_r_state = on;
     applyPins();
 }
+
+void ledSetGreen(bool on) {
+    if (!g_led_enabled) return;
+    g_g_state = on;
+    applyPins();
+}
+
+void ledSetBlue(bool on) {
+    if (!g_led_enabled) return;
+    g_b_state = on;
+    applyPins();
+}
+
+void ledToggleGreen() {
+    if (!g_led_enabled) return;
+    g_g_state = !g_g_state;
+    applyPins();
+}
