@@ -321,3 +321,25 @@ static void test_led_and_wifi_scanner() {
     ASSERT_EQ_INT(mockArduino().pin_level[LED_B], LOW);
     ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
 
+    // Wi-Fi scanner handles sanitized SSIDs, MAX_SCAN_RESULTS, and consistent band counts (ch 15..35 not dropped!)
+    wifiScannerInit();
+    for (int i = 0; i < 70; i++) {
+        rtw_scan_result_t ap{};
+        std::memset(&ap, 0, sizeof(ap));
+        ap.channel = (i == 0) ? 11 : (i == 1) ? 20 : 149; // ch 20 must count in 5G without gap
+        ap.signal_strength = -55;
+        ap.BSSID.octet[5] = static_cast<uint8_t>(i);
+        std::memcpy(ap.SSID.val, "Cafe\x01Net", 8);
+        ap.SSID.len = 8;
+        mockWifi().canned_scan_results.push_back(ap);
+    }
+
+    ASSERT_EQ_INT(wifiScanNetworks(), 0);
+    ASSERT_EQ_INT(g_scan_results.size(), MAX_SCAN_RESULTS);
+    ASSERT_STREQ(g_scan_results[0].ssid, "CafeNet");
+    int c24 = 0, c5g = 0;
+    wifiScanCountByBand(&c24, &c5g);
+    ASSERT_EQ_INT(c24, 1);
+    ASSERT_EQ_INT(c5g, MAX_SCAN_RESULTS - 1);
+    ASSERT_EQ_INT(c24 + c5g, MAX_SCAN_RESULTS);
+
