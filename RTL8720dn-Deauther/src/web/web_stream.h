@@ -50,4 +50,19 @@ public:
         }
     }
 
+    void writeStr(const char* cstr) {
+        if (!cstr) return;
+        writeBytes(cstr, strlen(cstr));
+    }
+
+    void writeChar(char c) {
+        writeBytes(&c, 1);
+    }
+
+    void writeInt(long val) {
+        char tmp[24];
+        int n = snprintf(tmp, sizeof(tmp), "%ld", val);
+        if (n > 0) writeBytes(tmp, (size_t)n);
+    }
+
 #endif // WEB_STREAM_H
