@@ -32,6 +32,18 @@ public:
     void clearSSIDs();
     void setRandomMode(bool enable, int count = 10);
 
+    void start();
+    void stop();
+    uint32_t run();
+
+    bool isActive() const { return _active; }
+    size_t getNetworkCount() const { return _networks.size(); }
+
+private:
+    void _generateRandomMAC(uint8_t* mac);
+    String _generateRandomSSID(int length);
+    bool _craftAndSend(const String& ssid, const uint8_t* bssid, int channel);
+    void _hopChannelIfDue();
 
     std::vector<SpammedNetwork> _networks;
     bool _active;
