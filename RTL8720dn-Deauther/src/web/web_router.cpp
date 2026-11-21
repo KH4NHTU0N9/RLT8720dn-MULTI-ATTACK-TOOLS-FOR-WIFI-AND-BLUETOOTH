@@ -556,3 +556,23 @@ void webServeClient(WiFiServer& server) {
     }
     req_buf[req_len] = '\0';
 
+    WiFiClientOutput output(client);
+    bool skip_stop = false;
+
+    if (req_oversized) {
+        webRenderPlainError(output, 413, "Payload Too Large");
+    } else if (req_bad) {
+        webRenderPlainError(output, 400, "Bad Request");
+    } else if (req_len == 0) {
+        // Silent empty TCP probe; close cleanly without generating HTML
+    } else {
+        ServerContext ctx{&server, &client};
+        skip_stop = webRouteRawRequest(req_buf, req_len, output, _doWifiRescan, _prepareRadioAttack, &ctx);
+        if (g_app.attack_mode == AttackMode::BLE_SPAM) {
+            client.stop();
+            delay(TCP_FLUSH_DELAY_MS);
+            server.stop();
+            skip_stop = true;
+        }
+    }
+
