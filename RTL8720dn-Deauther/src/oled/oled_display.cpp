@@ -15,6 +15,25 @@
 static uint8_t  _fb[OLED_FB_BYTES];
 static uint8_t  _prev_fb[OLED_FB_BYTES];
 static bool     _force_redraw = true;
+static bool     _initialized  = false;
+static uint32_t _last_refresh = 0;
+static uint32_t _attack_start = 0;
+static uint8_t  _anim_frame   = 0;
+static bool     _sda_is_out   = false;
+static bool     _scl_is_high  = true;
+static const char _spinner[]  = { '|', '/', '-', '\\' };
+
+// ===================================================================
+// SOFTWARE I2C (bit-bang, cached pin state for low overhead)
+// ===================================================================
+static void _i2c_dly() { delayMicroseconds(2); }
+
+static void _sda_high() {
+    if (_sda_is_out) {
+        pinMode(OLED_SDA, INPUT_PULLUP);
+        _sda_is_out = false;
+    }
+}
     _sda_high();
     _i2c_dly();
 }
