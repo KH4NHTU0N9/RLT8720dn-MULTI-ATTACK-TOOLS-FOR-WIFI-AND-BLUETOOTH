@@ -19,3 +19,24 @@ static void applyPins() {
     digitalWrite(LED_G, g_g_state ? HIGH : LOW);
     digitalWrite(LED_B, g_b_state ? HIGH : LOW);
 }
+
+void ledInit() {
+    pinMode(LED_R, OUTPUT);
+    pinMode(LED_G, OUTPUT);
+    pinMode(LED_B, OUTPUT);
+    g_led_initialized = true;
+    g_r_state = false;
+    g_g_state = false;
+    g_b_state = false;
+    applyPins();
+}
+
+void ledSetEnabled(bool enabled) {
+    g_led_enabled = enabled;
+    if (!enabled) {
+        g_r_state = false;
+        g_g_state = false;
+        g_b_state = false;
+    }
+    applyPins();
+}
