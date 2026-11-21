@@ -37,3 +37,15 @@ Toàn bộ firmware trong `RTL8720dn-Deauther/` được tách thành các modul
    * **Bluetooth:** Chọn cấu hình BLE Advertising hoặc quét thiết bị BLE lân cận và điền nhanh MAC/Address Type (`Public`/`Random`) xuống form GATT Writer.
    * **Settings:** Cấu hình thông số mặc định, bật/tắt LED trên board và theo dõi bộ nhớ Free Heap theo thời gian thực.
 
+---
+
+## Yêu cầu phần cứng & Biên dịch (Hardware & Build)
+
+* **Board:** Ai-Thinker BW16 (Realtek RTL8720DN).
+* **Core Arduino:** Realtek AmebaD SDK `3.1.9` (`realtek:AmebaD:Ai-Thinker_BW16`).
+* **Ăng-ten ngoài:** Chuẩn IPEX hỗ trợ dual-band 2.4G/5GHz.
+
+Biên dịch kiểm tra qua Arduino CLI:
+
+```sh
+arduino-cli compile --clean --fqbn realtek:AmebaD:Ai-Thinker_BW16 --warnings all RTL8720dn-Deauther
