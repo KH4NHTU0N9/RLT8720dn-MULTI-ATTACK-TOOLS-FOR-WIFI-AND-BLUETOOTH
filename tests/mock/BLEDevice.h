@@ -87,4 +87,12 @@ public:
         return &client;
     }
 };
+
+inline MockBLEDevice& mockBleInstance() {
+    static MockBLEDevice b;
+    return b;
+}
+
+#define BLE mockBleInstance()
+
 #endif // MOCK_BLE_DEVICE_H
