@@ -10,3 +10,16 @@ Dự án mã nguồn mở dành cho module **RTL8720DN (BW16 Dual-Band)**, đư�
 
 ## Kiến trúc mã nguồn (Modular Architecture)
 
+Toàn bộ firmware trong `RTL8720dn-Deauther/` được tách thành các module độc lập, rõ trách nhiệm và dễ kiểm thử:
+
+* `RTL8720dn-Deauther.ino`: Entrypoint gọn nhẹ (`setup()` / `loop()`), khôi phục SoftAP và điều phối state machine.
+* `debug.h`: Macro ghi log UART (`115200` baud) và `debugPrintMac()` không cấp phát heap.
+* `src/config/app_config.h`: Trung tâm cấu hình hằng số dung lượng, giới hạn tham số và timing (tối ưu cho ~250 KB FreeRTOS heap).
+* `src/core/`: State dùng chung (`app_state.h`), điều khiển RGB LED (`led_controller.{h,cpp}`), và vòng lặp tác vụ radio (`attack_runner.{h,cpp}`).
+* `src/oled/oled_display.{h,cpp}`: Driver SSD1306 `128x64` Software I2C (PA25/PA26) với thứ tự `pinMode` trước `digitalWrite`, cache trạng thái chân GPIO và cơ chế **dirty-page diffing**.
+* `src/wifi/wifi_scanner.{h,cpp}`: Quét Wi-Fi 2.4GHz + 5GHz an toàn bộ nhớ, phân loại băng tần đồng nhất (`1..14` vs `> 14`) và khôi phục SoftAP (`wifiRestoreSoftAp`).
+* `src/ble/ble_manager.{h,cpp}`: Quản lý BLE Scanner, GATT Client (`configClient()` + async connection polling), và bộ dựng gói quảng bá chuẩn độ dài AD TLV (`Apple 30B`, `Google 14B`, `Windows 18B`).
+* `src/packet-injection/packet-injection.{h,cpp}` & `src/spammer/spammer.{h,cpp}` & `src/interference/interference.{h,cpp}`: Bộ dựng khung 802.11 (`__attribute__((packed))`), kiểm tra giới hạn TLV tag, staging lock-free giữa callback RX và vòng lặp chính để tránh deadlock semaphore `wifi_set_promisc`.
+* `src/security/security_utils.h`: Escape HTML chống XSS, URL decode chặn `%00`, parser số nguyên chặt chẽ (`parseStrictIntRange`), parser HTTP request-line và `Content-Length` không phân biệt hoa/thường.
+* `src/web/`: `web_stream.h` (gộp chunk `<= 1024B` bảo vệ pool TCP LwIP), `web_ui.{h,cpp}` (giao diện Web 4 tab responsive), và `web_router.{h,cpp}` (định tuyến GET/POST chuẩn HTTP 200/204/303/400/404/405/413).
+
