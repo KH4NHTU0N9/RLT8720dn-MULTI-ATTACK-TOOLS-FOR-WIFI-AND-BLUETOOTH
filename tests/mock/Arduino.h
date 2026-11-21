@@ -201,4 +201,16 @@ static inline long random(long howsmall, long howbig) {
     return howsmall + random(howbig - howsmall);
 }
 
+class MockSerial {
+public:
+    std::string log;
+    bool initialized = false;
+    unsigned long baud = 0;
+
+    void begin(unsigned long b) {
+        initialized = true;
+        baud = b;
+    }
+
+
 #endif // MOCK_ARDUINO_H
