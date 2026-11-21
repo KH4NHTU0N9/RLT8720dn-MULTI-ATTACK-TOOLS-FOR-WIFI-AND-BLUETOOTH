@@ -180,3 +180,17 @@ static void test_packet_injection_frames_and_guards() {
         const uint8_t* e60 = findTaggedIe(&csa5[36], csa5.size() - 36, 60);
         ASSERT_TRUE(e60 != nullptr);
         ASSERT_EQ_INT(e60[1], 4);
+        ASSERT_EQ_INT(e60[3], cases5g[i].op);
+        ASSERT_EQ_INT(e60[4], cases5g[i].ch);
+        ASSERT_EQ_INT(e60[5], 1);
+    }
+}
+
+static void test_spammer_module() {
+    resetHarness();
+
+    Spammer.addSSID("");
+    ASSERT_EQ_INT(Spammer.getNetworkCount(), 0);
+    Spammer.addSSID("ValidSSID_12345678901234567890_OVERLONG_SUFFIX");
+    ASSERT_EQ_INT(Spammer.getNetworkCount(), 1);
+
