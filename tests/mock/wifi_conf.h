@@ -60,4 +60,20 @@ static inline void wifi_enter_promisc_mode() {
     mockWifi().enter_promisc_calls++;
 }
 
+static inline void wifi_set_promisc(rtw_rcr_level_t enabled, promisc_callback_t callback, unsigned char len_used) {
+    MockWifiState& w = mockWifi();
+    w.set_promisc_calls++;
+    if (w.in_promisc_callback) {
+        w.self_deadlock_detected = true;
+    }
+    w.promisc_level = enabled;
+    w.promisc_cb = callback;
+    w.promisc_len_used = len_used;
+}
+
+static inline int wifi_disable_powersave() {
+    mockWifi().powersave_disabled = true;
+    return 0;
+}
+
 #endif // MOCK_WIFI_CONF_H
