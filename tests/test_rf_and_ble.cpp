@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "wifi_conf.h"
+#include "WiFiServer.h"
 #include "BLEDevice.h"
 #undef min
 #undef max
@@ -423,6 +424,25 @@ static void test_ble_manager_payloads_scan_and_gatt_write() {
     ASSERT_TRUE(st == BleWriteStatus::BLE_WRITE_DISCOVERY_TIMEOUT);
 }
 
+static void test_attack_runner_sta_and_recovery() {
+    resetHarness();
+    attackPrepareStaRadio();
+    ASSERT_EQ_INT(mockWifi().current_mode, RTW_MODE_STA);
+    ASSERT_TRUE(mockWifi().powersave_disabled);
+
+    WiFiServer srv(80);
+    g_app.attack_mode = AttackMode::DEAUTH;
+    g_deauth_channels.clear();
+    attackRunTick(srv);
+    ASSERT_TRUE(g_app.attack_mode == AttackMode::IDLE);
+
+    g_app.attack_mode = AttackMode::INTERFERENCE;
+    attackRunTick(srv);
+    ASSERT_TRUE(g_app.attack_mode == AttackMode::IDLE);
+    ASSERT_EQ_INT(mockWifi().current_mode, RTW_MODE_AP);
+    ASSERT_EQ_INT(srv.begin_calls, 1);
+}
+
 int main() {
     std::printf("Running RTL8720dn RF, Spammer, Interference, LED & BLE unit tests...\n");
     test_packet_injection_frames_and_guards();
@@ -430,6 +450,7 @@ int main() {
     test_interference_sniffer_deadlock_and_synthetic_fallback();
     test_led_and_wifi_scanner();
     test_ble_manager_payloads_scan_and_gatt_write();
+    test_attack_runner_sta_and_recovery();
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
