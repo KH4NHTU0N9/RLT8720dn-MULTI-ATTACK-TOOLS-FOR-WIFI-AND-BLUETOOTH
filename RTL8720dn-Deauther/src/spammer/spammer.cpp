@@ -144,4 +144,19 @@ bool SSIDSpammer::_craftAndSend(const String& ssid, const uint8_t* bssid, int ch
     const size_t need = 2 + ssid_len + sizeof(kRates) + 3;
     if (offset + need > sizeof(frame)) return false;
 
+    frame[offset++] = 0x00;
+    frame[offset++] = (uint8_t)ssid_len;
+    if (ssid_len > 0) {
+        memcpy(&frame[offset], ssid.c_str(), ssid_len);
+        offset += ssid_len;
+    }
+
+    memcpy(&frame[offset], kRates, sizeof(kRates));
+    offset += sizeof(kRates);
+
+    frame[offset++] = 0x03;
+    frame[offset++] = 0x01;
+    frame[offset++] = (uint8_t)channel;
+
+    return wifi_tx_raw_frame(frame, offset);
 }
