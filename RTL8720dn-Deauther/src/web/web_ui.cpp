@@ -176,3 +176,20 @@ static void _renderBandCard(WebStream& out, const char* title, const char* cls,
     }
     out.writeStr("</tbody></table></div></div>");
 }
+
+static void _renderWifiPanel(WebStream& out, const AppState& app,
+                             const std::vector<WiFiScanResult>& scan_results) {
+    out.writeStr("<div id='p_wifi' class='panel on'><form method='post' action='/deauth'>");
+    _renderBandCard(out, "5 GHz Networks", "g5", scan_results, true);
+    _renderBandCard(out, "2.4 GHz Networks", "g2", scan_results, false);
+
+    out.writeStr("<div class='card'><div class='row'>"
+                 "<div class='fld'><label>Frames / pulse</label><input type='number' name='frames' min='1' max='5000' value='");
+    out.writeInt((long)app.config.frames_per_deauth);
+    out.writeStr("'></div><div class='fld'><label>Deauth Reason</label><select name='reason'>");
+    _renderReasonOptions(out, app.config.deauth_reason);
+    out.writeStr("</select></div></div><div class='acts'>"
+                 "<button class='btn red' type='submit' formaction='/deauth'>Start Deauth Attack</button>"
+                 "<button class='btn pri' type='submit' formaction='/interfere'>Start Interference (Max 4)</button>"
+                 "</div></div></form></div>");
+}
