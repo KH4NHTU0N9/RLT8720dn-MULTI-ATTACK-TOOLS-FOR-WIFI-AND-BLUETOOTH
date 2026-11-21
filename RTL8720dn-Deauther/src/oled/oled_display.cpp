@@ -34,6 +34,22 @@ static void _sda_high() {
         _sda_is_out = false;
     }
 }
+
+static void _sda_low() {
+    if (!_sda_is_out) {
+        pinMode(OLED_SDA, OUTPUT);
+        digitalWrite(OLED_SDA, LOW);
+        _sda_is_out = true;
+    }
+}
+
+static void _scl_high() {
+    if (!_scl_is_high) {
+        digitalWrite(OLED_SCL, HIGH);
+        _scl_is_high = true;
+    }
+}
+
     _sda_high();
     _i2c_dly();
 }
