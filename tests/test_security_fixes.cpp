@@ -224,6 +224,22 @@ static void test_ssid_mac_and_http_helpers() {
     ASSERT_EQ_INT(clampRssiPercent(0), 100);
     ASSERT_EQ_INT(clampRssiPercent(50), 100);
 
+    // Channel band classification must partition [1..14] vs [>14] cleanly without 15..35 drops
+    ASSERT_TRUE(is24GhzChannel(1));
+    ASSERT_TRUE(is24GhzChannel(14));
+    ASSERT_FALSE(is5GhzChannel(14));
+    ASSERT_FALSE(is24GhzChannel(15));
+    ASSERT_TRUE(is5GhzChannel(15));
+    ASSERT_TRUE(is5GhzChannel(36));
+    ASSERT_TRUE(is5GhzChannel(165));
+
+    // HTTP response header CRLF & security headers
+    String hdr200 = buildHttpResponseHeaders(200, "text/html");
+    ASSERT_TRUE(hdr200.indexOf("HTTP/1.1 200 OK\r\n") == 0);
+    ASSERT_TRUE(hdr200.indexOf("X-Content-Type-Options: nosniff\r\n") >= 0);
+    ASSERT_TRUE(hdr200.indexOf("X-Frame-Options: DENY\r\n") >= 0);
+    ASSERT_TRUE(hdr200.indexOf("\r\n\r\n") >= 0);
+
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
