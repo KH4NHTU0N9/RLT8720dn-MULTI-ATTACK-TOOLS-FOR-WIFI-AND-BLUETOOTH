@@ -18,6 +18,22 @@ static const int adj_channels_5g[] = {36, 40, 44, 48, 149, 153, 157, 161, 165};
 static const uint8_t csa_ghost_24[] = {12, 13, 1};
 static const uint8_t csa_ghost_5g[] = {36, 40, 44, 48, 149, 153, 157, 161};
 
+#define CAPTURE_TIMEOUT_MS       2500
+#define CHANNEL_SWITCH_DELAY_MS  BAND_SWITCH_DELAY_MS
+#define BURST_COUNT              120
+#define TARGET_RATIO             9
+#define MAX_BEACON_TAGS_LEN      400
+
+// ===================================================================
+// GLOBAL STATE
+// ===================================================================
+static BeaconClone targets[MAX_INTERFERENCE_TARGETS];
+static int         num_targets    = 0;
+static int         active_target  = 0;
+static int         adj_hop_idx    = 0;
+static int         csa_idx        = 0;
+static uint32_t    g_mac_counter  = 0xA5000000;
+static uint32_t    last_blink_ms  = 0;
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
