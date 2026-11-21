@@ -254,6 +254,23 @@ static void test_ssid_mac_and_http_helpers() {
                  "Content-Length: 0\r\n"
                  "Connection: close\r\n\r\n");
 }
+
+static void test_strict_int_and_http_request_parsers() {
+    long val = -999;
+    ASSERT_FALSE(parseStrictInt("", &val));
+    ASSERT_FALSE(parseStrictInt("   ", &val));
+    ASSERT_FALSE(parseStrictInt("abc", &val));
+    ASSERT_FALSE(parseStrictInt("42px", &val));
+    ASSERT_TRUE(parseStrictInt("  128  ", &val));
+    ASSERT_EQ_INT(val, 128);
+
+    ASSERT_FALSE(parseStrictIntRange("0", 1, 5000, &val));
+    ASSERT_FALSE(parseStrictIntRange("5001", 1, 5000, &val));
+    ASSERT_TRUE(parseStrictIntRange("1", 1, 5000, &val));
+    ASSERT_EQ_INT(val, 1);
+    ASSERT_TRUE(parseStrictIntRange("5000", 1, 5000, &val));
+    ASSERT_EQ_INT(val, 5000);
+
     if (g_tests_failed > 0) {
         std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
         return 1;
