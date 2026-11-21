@@ -56,3 +56,27 @@ static const char kCssControls[] =
     ".acts .btn{flex:1 1 180px;padding:11px 14px}"
     ".kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}.kv:last-child{border-bottom:0}";
 
+static const char kScript[] =
+    "<script>"
+    "function tab(id){"
+      "document.querySelectorAll('.panel').forEach(function(e){e.classList.toggle('on',e.id===id);});"
+      "document.querySelectorAll('.tab').forEach(function(e){e.classList.toggle('on',e.getAttribute('data-t')===id);});"
+      "try{sessionStorage.setItem('tab',id);}catch(e){}"
+    "}"
+    "function tog(cls,v){document.querySelectorAll('.'+cls).forEach(function(c){c.checked=v;});}"
+    "function pickBle(m,t){"
+      "var em=document.getElementById('b_mac'),et=document.getElementById('b_type');"
+      "if(em)em.value=m;if(et)et.value=String(t);"
+      "tab('p_ble');if(em)em.scrollIntoView({behavior:'smooth',block:'center'});"
+    "}"
+    "function fillSpam(v){var e=document.getElementById('s_list');if(e)e.value=v;}"
+    "document.addEventListener('DOMContentLoaded',function(){"
+      "try{var s=sessionStorage.getItem('tab');if(s&&document.getElementById(s))tab(s);}catch(e){}"
+      "document.querySelectorAll('form').forEach(function(f){"
+        "f.addEventListener('submit',function(ev){"
+          "var btn=ev.submitter||f.querySelector('button[type=submit],input[type=submit]');"
+          "if(btn){setTimeout(function(){btn.disabled=true;btn.textContent='Working...';},10);}"
+        "});"
+      "});"
+    "});"
+    "</script></body></html>";
