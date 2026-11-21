@@ -70,6 +70,32 @@ static void _build_synthetic_payload(BeaconClone* t) {
     uint8_t ch = (uint8_t)t->target_channel;
     bool is5GHz = (t->target_channel > 14);
 
+    if (t->payload) {
+        free(t->payload);
+        t->payload = NULL;
+    }
+    t->payload_len = 0;
+
+    if (is5GHz) {
+        static const uint8_t tpl_5g[] = {
+            0x00, 0x00,                                         // Tag 0: Hidden SSID
+            0x01, 0x08, 0x8C, 0x12, 0x98, 0x24,
+                        0xB0, 0x48, 0x60, 0x6C,                 // Tag 1: Supported Rates (6-54M)
+            0x2D, 0x1A,
+            0xEF, 0x09, 0x17,
+            0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,           // Tag 45: HT Cap
+            0x3D, 0x16,                                         // Tag 61: HT Operation
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        const size_t tpl_len = sizeof(tpl_5g);
+        t->payload = (uint8_t*)malloc(tpl_len);
+        if (!t->payload) {
+            t->state = INT_STATE_IDLE;
+            return;
     for (int i = 0; i < num_targets; i++) {
         if (targets[i].state == INT_STATE_CAPTURING) return INT_STATE_CAPTURING;
     }
