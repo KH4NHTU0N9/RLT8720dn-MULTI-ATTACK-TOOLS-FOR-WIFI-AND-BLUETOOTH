@@ -23,3 +23,17 @@ Toàn bộ firmware trong `RTL8720dn-Deauther/` được tách thành các modul
 * `src/security/security_utils.h`: Escape HTML chống XSS, URL decode chặn `%00`, parser số nguyên chặt chẽ (`parseStrictIntRange`), parser HTTP request-line và `Content-Length` không phân biệt hoa/thường.
 * `src/web/`: `web_stream.h` (gộp chunk `<= 1024B` bảo vệ pool TCP LwIP), `web_ui.{h,cpp}` (giao diện Web 4 tab responsive), và `web_router.{h,cpp}` (định tuyến GET/POST chuẩn HTTP 200/204/303/400/404/405/413).
 
+---
+
+## Giao diện Web UI & Cách sử dụng
+
+1. Sau khi cấp nguồn hoặc nhấn **RST**, mạch phát mạng SoftAP mặc định:
+   * **SSID:** `RTL8720dn-Deauther`
+   * **Mật khẩu:** `0123456789` *(Khuyến nghị đổi trong `src/config/app_config.h` trước khi triển khai thực tế)*
+2. Kết nối điện thoại hoặc máy tính vào Wi-Fi trên, sau đó mở trình duyệt tại **`http://192.168.1.1`**.
+3. Giao diện mới được tổ chức thành **4 tab trực quan**:
+   * **Wi-Fi:** Tách riêng danh sách mạng 5 GHz và 2.4 GHz, nút chọn nhanh từng băng tần (`All`), thông báo toast trạng thái và nút submit tách biệt rõ ràng cho từng chế độ.
+   * **Beacon Flood:** Hỗ trợ nhập danh sách SSID, preset mẫu, hoặc sinh SSID ngẫu nhiên có kiểm soát dung lượng (`1..64`).
+   * **Bluetooth:** Chọn cấu hình BLE Advertising hoặc quét thiết bị BLE lân cận và điền nhanh MAC/Address Type (`Public`/`Random`) xuống form GATT Writer.
+   * **Settings:** Cấu hình thông số mặc định, bật/tắt LED trên board và theo dõi bộ nhớ Free Heap theo thời gian thực.
+
