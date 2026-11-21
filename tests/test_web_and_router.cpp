@@ -188,3 +188,21 @@ static void test_post_parser_and_clampers() {
     ASSERT_EQ_INT(webClampBleSpamType("9"), 0);
     ASSERT_EQ_INT(webClampBleSpamType("2"), 2);
 }
+
+static void test_dashboard_ui_and_xss_protection() {
+    resetWebState();
+
+    WiFiScanResult ap24{};
+    ap24.ssid = "<script>alert('xss')</script>";
+    std::memcpy(ap24.bssid, "\x11\x22\x33\x44\x55\x66", 6);
+    ap24.rssi = -52;
+    ap24.channel = 6;
+    g_scan_results.push_back(ap24);
+
+    WiFiScanResult ap5{};
+    ap5.ssid = "";
+    std::memcpy(ap5.bssid, "\xAA\xBB\xCC\xDD\xEE\xFF", 6);
+    ap5.rssi = -88;
+    ap5.channel = 149;
+    g_scan_results.push_back(ap5);
+
