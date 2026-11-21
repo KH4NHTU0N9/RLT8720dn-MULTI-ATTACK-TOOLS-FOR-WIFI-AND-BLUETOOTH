@@ -524,3 +524,18 @@ void webServeClient(WiFiServer& server) {
         }
         if (req_oversized) break;
 
+        if (header_end == (size_t)-1) {
+            header_end = _findHeaderEnd(req_buf, req_len);
+            if (header_end != (size_t)-1) {
+                int cl_res = extractHttpContentLength(req_buf, header_end, &content_length);
+                if (cl_res < 0) {
+                    req_bad = true;
+                    break;
+                }
+                if (content_length > (long)MAX_HTTP_REQ_SIZE) {
+                    req_oversized = true;
+                    break;
+                }
+            }
+        }
+
