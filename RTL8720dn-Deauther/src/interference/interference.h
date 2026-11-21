@@ -2,10 +2,10 @@
 #define INTERFERENCE_H
 
 #include <Arduino.h>
+#include <stddef.h>
+#include <stdint.h>
+#include "../config/app_config.h"
 #include "../packet-injection/packet-injection.h"
-
-// Maximum number of simultaneous interference targets
-#define MAX_INTERFERENCE_TARGETS 4
 
 typedef enum {
     INT_STATE_IDLE,
