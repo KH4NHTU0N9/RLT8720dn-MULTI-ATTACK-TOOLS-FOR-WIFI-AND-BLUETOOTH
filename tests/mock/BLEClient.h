@@ -24,4 +24,17 @@ public:
     std::string uuid;
     BLERemoteCharacteristic* characteristic = nullptr;
 
+    BLERemoteCharacteristic* getCharacteristic(const char* target_uuid) {
+        if (!characteristic || !target_uuid) return nullptr;
+        return (characteristic->uuid == target_uuid) ? characteristic : nullptr;
+    }
+};
+
+class BLEClient {
+public:
+    bool is_connected = true;
+    bool disc_done = true;
+    int discover_calls = 0;
+    BLERemoteService* service = nullptr;
+
 #endif // MOCK_BLE_CLIENT_H
