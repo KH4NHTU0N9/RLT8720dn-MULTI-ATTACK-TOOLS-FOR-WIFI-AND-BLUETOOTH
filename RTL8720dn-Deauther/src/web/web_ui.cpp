@@ -97,3 +97,24 @@ static void _renderStatusBanner(WebStream& out, const StatusNotice& notice) {
     out.writeHtmlEscaped(notice.message);
     out.writeStr("</div>");
 }
+
+static void _renderReasonOptions(WebStream& out, uint16_t active_reason) {
+    static const uint16_t kReasons[] = {1, 2, 4, 6, 7, 8};
+    static const char* const kLabels[] = {
+        "1 - Unspecified",
+        "2 - Auth invalid",
+        "4 - Inactivity",
+        "6 - Class 2 err",
+        "7 - Class 3 err",
+        "8 - STA leaving"
+    };
+    for (size_t i = 0; i < sizeof(kReasons) / sizeof(kReasons[0]); i++) {
+        out.writeStr("<option value='");
+        out.writeUInt((unsigned long)kReasons[i]);
+        out.writeStr("'");
+        if (active_reason == kReasons[i]) out.writeStr(" selected");
+        out.writeStr(">");
+        out.writeStr(kLabels[i]);
+        out.writeStr("</option>");
+    }
+}
