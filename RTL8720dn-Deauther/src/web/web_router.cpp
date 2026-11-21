@@ -291,3 +291,28 @@ static void _handleBleWritePost(const std::vector<std::pair<String, String>>& pa
         return;
     }
 
+#ifdef UNIT_TEST
+    g_app.notice.set(StatusKind::STATUS_OK, "BLE GATT payload validated.");
+    (void)addr_type;
+#else
+    BleWriteStatus st = bleWriteCharacteristic(mac, (uint8_t)addr_type, service_uuid, char_uuid, val, decoded_len);
+    switch (st) {
+        case BleWriteStatus::BLE_WRITE_OK:
+            g_app.notice.set(StatusKind::STATUS_OK, "BLE GATT write succeeded.");
+            break;
+        case BleWriteStatus::BLE_WRITE_CONNECT_FAILED:
+            g_app.notice.set(StatusKind::STATUS_ERR, "BLE connect failed (check MAC/addr type).");
+            break;
+        case BleWriteStatus::BLE_WRITE_DISCOVERY_TIMEOUT:
+            g_app.notice.set(StatusKind::STATUS_ERR, "BLE service discovery timed out.");
+            break;
+        case BleWriteStatus::BLE_WRITE_SERVICE_NOT_FOUND:
+            g_app.notice.set(StatusKind::STATUS_ERR, "BLE service UUID not found.");
+            break;
+        case BleWriteStatus::BLE_WRITE_CHAR_NOT_FOUND:
+            g_app.notice.set(StatusKind::STATUS_ERR, "BLE characteristic UUID not found.");
+            break;
+        case BleWriteStatus::BLE_WRITE_CLIENT_FAILED:
+        case BleWriteStatus::BLE_WRITE_FAILED:
+        default:
+            g_app.notice.set(StatusKind::STATUS_ERR, "BLE characteristic write failed.");
