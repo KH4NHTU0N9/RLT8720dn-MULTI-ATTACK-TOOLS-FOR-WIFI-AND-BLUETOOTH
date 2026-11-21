@@ -28,4 +28,18 @@ public:
     void startAdv() { start_calls++; }
 };
 
+class MockBLEDevice {
+public:
+    BLEScan scan;
+    BLEConnect conn;
+    BLEClient client;
+    BLEAdvert advert;
+
+    bool client_configured = false;
+    bool add_client_without_config = false;
+    bool conn_is_connected = true;
+    bool return_null_client = false;
+    int end_calls = 0;
+    int init_calls = 0;
+
 #endif // MOCK_BLE_DEVICE_H
