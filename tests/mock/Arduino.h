@@ -212,5 +212,18 @@ public:
         baud = b;
     }
 
+    template <typename T>
+    void print(const T& val) {
+        append(val);
+    }
+
+    template <typename T>
+    void println(const T& val) {
+        append(val);
+        log += '\n';
+    }
+
+    void println() { log += '\n'; }
+
 
 #endif // MOCK_ARDUINO_H
