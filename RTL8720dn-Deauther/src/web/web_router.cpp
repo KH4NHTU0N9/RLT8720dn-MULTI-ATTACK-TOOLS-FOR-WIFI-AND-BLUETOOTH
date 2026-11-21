@@ -483,3 +483,22 @@ static bool _doWifiRescan(void* ctx) {
     oled_show_idle(c24, c5g);
     return true;
 }
+
+static void _prepareRadioAttack(void* ctx) {
+    ServerContext* sc = (ServerContext*)ctx;
+    if (sc && sc->client) {
+        sc->client->stop();
+        delay(TCP_FLUSH_DELAY_MS);
+    }
+    if (sc && sc->server) {
+        sc->server->stop();
+    }
+    attackPrepareStaRadio();
+}
+
+void webServeClient(WiFiServer& server) {
+    WiFiClient client = server.available();
+    if (!client.connected()) {
+        return;
+    }
+
