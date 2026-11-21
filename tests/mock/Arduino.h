@@ -240,4 +240,14 @@ inline MockSerial& mockSerialInstance() {
     return ser;
 }
 
+#define Serial mockSerialInstance()
+
+// Mirror AmebaD wiring_constants.h min/max macros so host builds verify #undef guards
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
 #endif // MOCK_ARDUINO_H
