@@ -278,3 +278,24 @@ static void test_http_router_endpoints() {
         const char r[] = "JUNK";
         ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
         ASSERT_TRUE(out.contains("HTTP/1.1 400 Bad Request\r\n"));
+    }
+
+    // POST /rescan invokes scan callback and sets STATUS_OK toast notice
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /rescan HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_EQ_INT(rec.scan_calls, 1);
+        ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_OK);
+        ASSERT_TRUE(out.contains("HTTP/1.1 303 See Other\r\n"));
+    }
+
+    // POST /deauth without targets must stay IDLE with STATUS_WARN toast
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /deauth HTTP/1.1\r\nContent-Length: 10\r\n\r\nframes=200";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.attack_mode == AttackMode::IDLE);
+        ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_WARN);
+    }
+
