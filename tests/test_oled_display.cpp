@@ -132,3 +132,28 @@ struct Ssd1306WireListener {
             }
         }
         byte_pos++;
+    }
+
+    static void gpioHook(uint8_t pin, uint8_t mode, uint8_t level, void* ctx) {
+        (void)pin;
+        (void)mode;
+        (void)level;
+        Ssd1306WireListener* self = static_cast<Ssd1306WireListener*>(ctx);
+        const MockArduinoState& st = mockArduino();
+        const uint8_t scl = st.pin_level[PIN_SCL];
+        const uint8_t sda = (st.pin_mode[PIN_SDA] == OUTPUT) ? st.pin_level[PIN_SDA] : 1;
+
+        if (self->prev_scl == 1 && scl == 1 && self->prev_sda == 1 && sda == 0) {
+            self->in_tx = true;
+            self->bit_idx = 0;
+            self->cur_byte = 0;
+            self->byte_pos = 0;
+            self->tx_count++;
+        } else if (self->prev_scl == 1 && scl == 1 && self->prev_sda == 0 && sda == 1) {
+            self->in_tx = false;
+        } else if (self->prev_scl == 0 && scl == 1 && self->in_tx) {
+            if (self->bit_idx < 8) {
+                self->cur_byte = static_cast<uint8_t>((self->cur_byte << 1) | (sda & 1U));
+                self->bit_idx++;
+            } else {
+                self->bit_idx = 0;
