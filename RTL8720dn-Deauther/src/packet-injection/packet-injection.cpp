@@ -206,3 +206,27 @@ bool wifi_tx_beacon_csa_frame(void* src_mac, void* dst_mac, const char *ssid, ui
   memcpy(&frame[offset], rates, sizeof(rates));
   offset += sizeof(rates);
 
+  // Tag 3: DS Parameter Set (2.4 GHz channels only)
+  if (target_channel >= 1 && target_channel <= 14) {
+    frame[offset++] = 0x03;
+    frame[offset++] = 0x01;
+    frame[offset++] = target_channel;
+  }
+
+  // Tag 37: Channel Switch Announcement (CSA) - length 3
+  frame[offset++] = 37;
+  frame[offset++] = 3;
+  frame[offset++] = 1;
+  frame[offset++] = target_channel;
+  frame[offset++] = 1;
+
+  // Tag 60: Extended Channel Switch Announcement (ECSA) - length 4 per IEEE 802.11-2020 9.4.2.52
+  frame[offset++] = 60;
+  frame[offset++] = 4;
+  frame[offset++] = 1;
+  frame[offset++] = _operating_class_for_channel(target_channel);
+  frame[offset++] = target_channel;
+  frame[offset++] = 1;
+
+  return wifi_tx_raw_frame(frame, offset);
+}
