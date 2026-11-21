@@ -27,4 +27,18 @@
 #define DEFAULT_BEACONS_PER_SSID  3
 #define MAX_BEACONS_PER_SSID      20
 
+// Timing constants (milliseconds)
+#define BOOT_SPLASH_MS            1500
+#define WIFI_SCAN_TIMEOUT_MS      7500
+#define HTTP_REQ_TIMEOUT_MS       1000
+#define TCP_FLUSH_DELAY_MS        50
+#define BLE_SCAN_DURATION_MS      3000
+#define BLE_CONNECT_WAIT_MS       2200
+#define BLE_DISCOVERY_TIMEOUT_MS  5000
+#define BLE_ADV_STOP_SETTLE_MS    10
+#define BLE_ADV_DWELL_MS          200
+#define BAND_SWITCH_DELAY_MS      15
+#define SAME_BAND_DELAY_MS        2
+#define IDLE_LOOP_DELAY_MS        2
+
 #endif // APP_CONFIG_H
