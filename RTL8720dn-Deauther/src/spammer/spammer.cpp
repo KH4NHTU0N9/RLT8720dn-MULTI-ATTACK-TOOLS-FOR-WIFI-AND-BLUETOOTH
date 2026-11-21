@@ -128,4 +128,20 @@ bool SSIDSpammer::_craftAndSend(const String& ssid, const uint8_t* bssid, int ch
     memcpy(&frame[16], bssid, 6);
     size_t offset = 24;
 
+    if (offset + 12 > sizeof(frame)) return false;
+    uint64_t tsf = (uint64_t)micros();
+    memcpy(&frame[offset], &tsf, 8);
+    offset += 8;
+    frame[offset++] = 0x64;
+    frame[offset++] = 0x00;
+    frame[offset++] = 0x11;
+    frame[offset++] = 0x04;
+
+    size_t ssid_len = ssid.length();
+    if (ssid_len > MAX_SSID_LEN) ssid_len = MAX_SSID_LEN;
+
+    static const uint8_t kRates[] = {0x01, 0x08, 0x82, 0x84, 0x8B, 0x96, 0x0C, 0x12, 0x18, 0x24};
+    const size_t need = 2 + ssid_len + sizeof(kRates) + 3;
+    if (offset + need > sizeof(frame)) return false;
+
 }
