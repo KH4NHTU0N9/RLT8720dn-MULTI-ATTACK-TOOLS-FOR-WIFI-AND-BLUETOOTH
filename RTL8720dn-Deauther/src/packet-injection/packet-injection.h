@@ -84,3 +84,19 @@ struct __attribute__((packed)) ProbeRequest {
   uint8_t access_point[6];
   const uint16_t sequence_number = 0;
 };
+
+struct __attribute__((packed)) CSAFrame {
+  uint16_t frame_control = 0xD0; // Action frame
+  uint16_t duration = 0;
+  uint8_t destination[6];
+  uint8_t source[6];
+  uint8_t access_point[6];
+  const uint16_t sequence_number = 0;
+  uint8_t category = 0;        // Spectrum Management
+  uint8_t action = 4;          // Channel Switch Announcement
+  uint8_t element_id = 37;
+  uint8_t ie_length = 3;
+  uint8_t switch_mode = 1;
+  uint8_t new_channel = 1;
+  uint8_t switch_count = 1;
+};
