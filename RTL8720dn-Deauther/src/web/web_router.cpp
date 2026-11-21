@@ -45,3 +45,17 @@ void webParsePostBody(const char* body, size_t body_len,
     }
     out_params.reserve(est);
 
+    size_t start = 0;
+    while (start <= body_len) {
+        size_t end = start;
+        while (end < body_len && body[end] != '&') end++;
+
+        const size_t pair_len = end - start;
+        if (pair_len > 0) {
+            size_t eq = start;
+            while (eq < end && body[eq] != '=') eq++;
+            if (eq < end) {
+                String raw_key;
+                raw_key.reserve((unsigned int)(eq - start));
+                for (size_t k = start; k < eq; k++) raw_key += body[k];
+
