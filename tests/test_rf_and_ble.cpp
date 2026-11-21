@@ -343,3 +343,23 @@ static void test_led_and_wifi_scanner() {
     ASSERT_EQ_INT(c5g, MAX_SCAN_RESULTS - 1);
     ASSERT_EQ_INT(c24 + c5g, MAX_SCAN_RESULTS);
 
+    mockWifi().wifi_scan_should_fail = true;
+    ASSERT_EQ_INT(wifiScanNetworks(), 1);
+}
+
+static void test_ble_manager_payloads_scan_and_gatt_write() {
+    resetHarness();
+
+    // Apple Proximity packet: AD1 (02 01 1A) + AD2 (len 0x1A, type 0xFF, 25 data bytes) = 30B exact
+    uint8_t buf[32];
+    size_t n = bleBuildAppleSpamPayload(buf, sizeof(buf), 1, 0xFE, 0xFF);
+    ASSERT_EQ_INT(n, BLE_APPLE_PAYLOAD_LEN);
+    ASSERT_EQ_INT(buf[0], 0x02);
+    ASSERT_EQ_INT(buf[1], 0x01);
+    ASSERT_EQ_INT(buf[2], 0x1A);
+    ASSERT_EQ_INT(buf[3], 0x1A);
+    ASSERT_EQ_INT(buf[4], 0xFF);
+    ASSERT_EQ_INT((1U + buf[0]) + (1U + buf[3]), n);
+    ASSERT_EQ_INT(buf[13], 0xFE);
+    ASSERT_EQ_INT(buf[14], 0xFF);
+
