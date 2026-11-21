@@ -347,3 +347,27 @@ static void test_http_router_endpoints() {
         ASSERT_TRUE(Spammer.isActive());
         ASSERT_EQ_INT(Spammer.getNetworkCount(), 4);
         Spammer.stop();
+    }
+
+    // POST /led_disable & /led_enable + /setconfig + /blewrite + /blespam
+    resetWebState();
+    {
+        MemoryWebOutput out;
+        const char r1[] = "POST /led_disable HTTP/1.1\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r1, std::strlen(r1), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_FALSE(ledIsEnabled());
+        const char r2[] = "POST /led_enable HTTP/1.1\r\n\r\n";
+        ASSERT_FALSE(webRouteRawRequest(r2, std::strlen(r2), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(ledIsEnabled());
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /blewrite HTTP/1.1\r\n\r\nmac=AA:BB:CC:DD:EE:FF&addr_type=1&service=FFE0&char=FFE1&data=INVALID";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_ERR);
+    }
+    {
+        MemoryWebOutput out;
+        const char r[] = "POST /blewrite HTTP/1.1\r\n\r\nmac=AA:BB:CC:DD:EE:FF&addr_type=1&service=FFE0&char=FFE1&data=01+FF";
+        ASSERT_FALSE(webRouteRawRequest(r, std::strlen(r), out, testPostScanCb, testPrepareAttackCb, &rec));
+        ASSERT_TRUE(g_app.notice.kind == StatusKind::STATUS_OK);
