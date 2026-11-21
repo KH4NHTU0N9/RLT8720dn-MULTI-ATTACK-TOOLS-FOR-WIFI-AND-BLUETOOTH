@@ -66,4 +66,15 @@ struct BLEAuditResult {
     uint8_t addr_type;
     int16_t rssi;
 };
+
+struct AppState {
+    AttackMode attack_mode = AttackMode::IDLE;
+    bool channel_needs_restore = true;
+    uint32_t sent_frames = 0;
+    AppConfig config;
+    StatusNotice notice;
+};
+
+extern AppState g_app;
+
 #endif // APP_STATE_H
