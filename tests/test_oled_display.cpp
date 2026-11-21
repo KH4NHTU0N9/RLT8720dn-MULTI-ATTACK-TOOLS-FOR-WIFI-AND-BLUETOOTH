@@ -265,3 +265,16 @@ static void test_refresh_throttling_and_attack_layouts() {
     ASSERT_EQ_INT(listener.countPixelsInRect(0, 14, 127, 14), 128);
     ASSERT_EQ_INT(mockArduino().write_before_pinmode_violations, 0);
 }
+
+int main() {
+    std::printf("Running RTL8720dn OLED driver & bit-bang I2C tests...\n");
+    test_pre_init_guards_and_gpio_hardfault_fix();
+    test_dirty_page_diffing_and_screens();
+    test_refresh_throttling_and_attack_layouts();
+    if (g_tests_failed > 0) {
+        std::fprintf(stderr, "FAILED: %d / %d assertions\n", g_tests_failed, g_tests_run);
+        return 1;
+    }
+    std::printf("PASSED: %d assertions\n", g_tests_run);
+    return 0;
+}
