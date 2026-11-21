@@ -74,3 +74,19 @@ bool unit_test_capture_raw_frame(const void* frame, size_t length) {
 }
 }
 
+class MemoryWebOutput : public IWebOutput {
+public:
+    std::string body;
+    std::vector<size_t> chunk_sizes;
+    size_t max_chunk = 0;
+    bool fail_next_write = false;
+
+    size_t writeBytes(const uint8_t* data, size_t len) override {
+        if (fail_next_write) return 0;
+        if (!data || len == 0) return 0;
+        body.append(reinterpret_cast<const char*>(data), len);
+        chunk_sizes.push_back(len);
+        if (len > max_chunk) max_chunk = len;
+        return len;
+    }
+
